@@ -2,14 +2,10 @@
 #include <iostream>
 #include <fstream>
 
-void settingUpEnvironment(const std::string &filetype)
-{
-    if(filetype == "cpp" || filetype == "hpp"){
-        //init keyword/token detection for c++
-        std::cout << "C++ extension detected" << std::endl;
-    }
-}
+#include "core/document.hpp"
+#include "plugins/ui/web/httpserver.hpp"
 
+/*
 void openFile(const std::string &filename){
     if (filename.length() == 0) return;
 	// Open file 
@@ -28,13 +24,15 @@ void openFile(const std::string &filename){
         std::cout << str << std::endl;
     }
 }
-
+*/
 int main(int argc, char* argv[]){
     std::cout << "Welcome to YATE" << std::endl;
+    YateCore::DocumentHandler docHandle;
     if(argv[1]){
         std::cout << "Open file" << std::endl;
         std::string filename = argv[1];
-        openFile(filename);
+        docHandle.open(filename);
+        //openFile(filename);
         std::cout << "File opened.." << std::endl;
     }
     while(true){

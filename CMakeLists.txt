@@ -16,6 +16,8 @@ configure_file(config.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/config.hpp)
 include_directories(${PROJECT_BINARY_BIN})
 
 file(GLOB_RECURSE sources      main.cpp)
+file(GLOB_RECURSE sources      core/document.cpp core/document.hpp)
+file(GLOB_RECURSE sources      plugins/ui/web/*.cpp plugins/ui/web/*.hpp)
 
 if(EXAMPLE_PROJECT_BUILD_TESTING)
   enable_testing()
@@ -26,8 +28,13 @@ endif()
 #link_directories(src/plugins/)
 #
 set(SRC_MAIN main.cpp)
+add_library(core STATIC)
+add_subdirectory(core)
 
 add_executable(${EXECUTABLE_NAME} ${SRC_MAIN})
+
+target_link_libraries(${EXECUTABLE_NAME} core)
+target_include_directories(${EXECUTABLE_NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
 # ^I generally order these from lower to higher abstraction levels.
 # Ex. if module1 uses module2, then add_subdirectory it _after_ module2.
