@@ -1,3 +1,7 @@
+/*
+ * Generated file: config.hpp   (Will be overwritten through cmake)
+ * Template file: config.hpp.in (Place changes in this file!!!)
+ */
 #ifndef CONFIG_H_IN
 #define CONFIG_H_IN
 
