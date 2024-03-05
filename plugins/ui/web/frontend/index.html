@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="">
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+        <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script type="text/javascript" src="js/main.js"></script>
+    </head>
+    <body onload="init()">
+      <header>
+        <h1>Y(et) A(nother) T(ext) E(ditor)</h1>
+        <div class="menu">
+            <input type="text"/>
+            <button onclick="open_file(this.previousElementSibling.value)">Open</button>
+            <input type="file" id="select_file" onchange="load_file(event)"/>
+        </div>
+      </header>
+      <main>
+          <div class="tree">
+              <ul id="dir_tree">
+              </ul>
+          </div>
+          <div class="main dropzone">
+              <pre contenteditable="true" class="hljs mb-0 p-4" onkeyup="highlight()"><code id="textdiv"></code></pre>
+          </div>
+      </main>
+      <footer></footer>
+    </body>
+</html>
