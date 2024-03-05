@@ -1,0 +1,5 @@
+Zusammenhängendes Token über Zeichen hinweg (bspw: "()")
+
+Token Klassifizierung abhängig von Sprache/Syntax
+Erkennen des Modus (Statemachine) abhängig von Syntax (bspw: Kommentar,String)
+
