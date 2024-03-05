@@ -1,49 +1,73 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <exception>
 
-#include "core/document.hpp"
-#include "plugins/ui/web/httpserver.hpp"
+#include "core/documenthandler.hpp"
+#include "plugins/document/documentfactory.hpp"
+#include "plugins/ui/web/webui.hpp"
+#include "utils/log.hpp"
+#include "wrapper/json/jsonwrapper.hpp"
 
-/*
-void openFile(const std::string &filename){
-    if (filename.length() == 0) return;
-	// Open file 
-    std::string filetype = filename.substr(filename.find('.', filename.length()-5)+1);
-    std::ifstream file;
-    file.open(filename, std::ios::binary | std::ios::in);
-    std::string str;
-    
-    std::cout << filetype << std::endl;
-    
-    settingUpEnvironment(filetype);
-        
-    while(true){
-        getline(file, str);
-        if(file.fail()) break;
-        std::cout << str << std::endl;
-    }
+#include <sys/poll.h>
+#include <termios.h>
+
+using namespace YateUtils;
+
+void set_term_quiet_input(){
+    struct termios tc;
+    tcgetattr(0, &tc);
+    tc.c_lflag &= ~(ICANON | ECHO);
+    tc.c_cc[VMIN] = 0;
+    tc.c_cc[VTIME] = 0;
+    tcsetattr(0, TCSANOW, &tc);
 }
-*/
 int main(int argc, char* argv[]){
-    std::cout << "Welcome to YATE" << std::endl;
-    YateCore::DocumentHandler docHandle;
+    log(Log_t::INFO, "Welcome to YATE\n");
+    YateDocument::DocumentFactory doc_factory;
+    YateCore::DocumentHandler docHandle(&doc_factory);
+    YatePlugin::WebUi ui_server("0.0.0.0", 8082);
+
+    // Json wrapper needed for web frontend
+    YateWrapper::JsonWrapper json_wrapper;
+    json_wrapper.set_document_handler(&docHandle);
+    ui_server.register_wrapper(&json_wrapper);
+
+
+    try{
+        ui_server.start();
+    } catch(std::exception& e) {
+        log(Log_t::ERROR, "%s\n", e.what());
+    }
+
     if(argv[1]){
-        std::cout << "Open file" << std::endl;
+        log(Log_t::DEBUG, "%s\n", "Open file");
         std::string filename = argv[1];
         docHandle.open(filename);
-        //openFile(filename);
-        std::cout << "File opened.." << std::endl;
-    }
-    while(true){
-        std::cout << "Check for incoming character.." << std::endl;
-        char in;
-        std::cin.get(in);
-        std::cin.clear();
-        while(in != '\n'){
-            std::cin.get(in);
-            std::cin.clear();
+        YateCore::IDocument* doc = docHandle.get_current_doc();
+        if(doc){
+            for(auto s : doc->get_lines()){
+                log(Log_t::SILLY, "%s\n", s.c_str());
+            }
         }
+
+        //openFile(filename);
+        log(Log_t::DEBUG, "%s\n", "File opened...");
+        //std::cout << "File opened.." << std::endl;
+    }
+
+    struct pollfd pfd = { .fd = 0, .events = POLLIN };
+    set_term_quiet_input();
+    while(true){
+        // Main loop
+        if (poll(&pfd, 1, 0)>0) {
+            int in = getchar();
+            if(in == 8 || in == 127){
+            } else if (in=='\n' || in == ' '){
+            } else {
+            }
+        }
+        usleep(100);
     }
 	return 0;
 }
