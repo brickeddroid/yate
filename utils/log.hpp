@@ -4,21 +4,21 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string>
-
-namespace YateUtils {
+namespace Yate::Utils {
 enum Log_t {
-    NONE,
     SILLY,
     VERBOSE,
     DEBUG,
     INFO,
     WARNING,
-    ERROR
+    ERROR,
+    NONE
 };
 
-//std::string log_level_to_string(Log_t ltype);
-int log(Log_t log_level, std::string format, ...);
+extern Log_t LogLevel;
 
-} // end namespace YateUtil
+int log(Log_t log_level, const std::string& domain, const std::string& format, ...);
+
+} // end namespace Yate::Utils
 
 #endif

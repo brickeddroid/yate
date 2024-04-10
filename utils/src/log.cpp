@@ -1,51 +1,44 @@
 #include "../log.hpp"
-//#include <ctime>
 #include <chrono>
+#include <map>
+#include <mutex>
 
-//using namespace std::chrono;
+namespace Yate::Utils {
 
-namespace YateUtils {
-/*
-std::cout << std::asctime(std::localtime(&result))
-          << result << " seconds since the Epoch\n";
-*/
-std::string log_level_to_string(Log_t ltype)
-{
-    switch(ltype){
-        case Log_t::NONE:
-            return "";
-        case Log_t::SILLY:
-            return "SILLY";
-        case Log_t::VERBOSE:
-            return "VERBOSE";
-        case Log_t::DEBUG:
-            return "DEBUG";
-        case Log_t::INFO:
-            return "INFO";
-        case Log_t::WARNING:
-            return "WARNING";
-        case Log_t::ERROR:
-            return "ERROR";
-        default:
-            return "UNKNOWN";
-    }
-}
+const std::map<Log_t, const std::string> log_level_to_string = {
+    { Log_t::SILLY,   "SILLY" },
+    { Log_t::VERBOSE, "VERBOSE" },
+    { Log_t::DEBUG,   "DEBUG" },
+    { Log_t::INFO,    "INFO" },
+    { Log_t::WARNING, "WARNING" },
+    { Log_t::ERROR,   "ERROR" },
+    { Log_t::NONE,    "NONE" }
+};
 
-//...
+Log_t LogLevel = Log_t::SILLY;
 
+std::mutex log_mutex;
 
-int log(Log_t log_level, std::string format, ...){
+int log(Log_t log_level, const std::string& domain, const std::string& format, ...){
+    const std::lock_guard<std::mutex> lock(log_mutex);
+    if(log_level < LogLevel) return 0;
+    std::stringstream ss;
     if(log_level != Log_t::NONE){
-        int64_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-        std::string ins_string = "[" + std::to_string(timestamp) + "]["+ log_level_to_string(log_level) +"] ";
-        format = format.insert(0, ins_string);
+        ss << "["
+           << std::chrono::floor<std::chrono::milliseconds>(std::chrono::system_clock::now())
+           << "]["
+           << log_level_to_string.at(log_level)
+           << "]["
+           << domain
+           << "] ";
     }
+    ss << format;
     int done = 0;
     va_list arg;
-    va_start(arg, format.c_str());
-    done = vfprintf(stdout, format.c_str(), arg);
+    va_start(arg, ss.str().c_str());
+    done = vfprintf(stdout, ss.str().c_str(), arg);
     va_end(arg);
     return done;
 }
 
-} // end namespace YateUtil
+} // end namespace Yate::Utils
