@@ -1,16 +1,26 @@
 #ifndef JSONWRAPPER_HPP
 #define JSONWRAPPER_HPP
-#include "../../core/interfaces/iwrapper.hpp"
+#include <iwrapper.hpp>
 
-namespace YateWrapper {
-class JsonWrapper : public YateCore::IWrapper {
+namespace Yate::Wrapper {
+class JsonWrapper : public Core::Api::IWrapper {
 public:
-    virtual std::string get_updated_data();
-    virtual void update_data(const std::string& json_data);
+    JsonWrapper(/*IDecorator& successor, */Core::DocumentHandler& document_handler, Core::Api::IUiPlugin& uiplugin);
 
-    virtual void wrap_document(YateCore::IDocument* const doc, std::string& result);
+    virtual void onOpenFileListChange(const Utils::Event & event) override;
+    virtual void onFileOpened(const Utils::Event & event) override;
+    virtual void onDocumentChange(const Utils::Event&) override;
+
+    virtual void onCommandRequest(const Utils::Event& event) override;
+/*
+    virtual std::string wrap_document_content(const std::string& content) override;
+    virtual std::string wrap_document_history(const std::vector<Core::DocumentChange>& history) override;
+    virtual std::string wrap_open_document_list(const std::map<std::string, Core::Document>& document_list) override;
+*/
+    //virtual std::string process_incoming_message(const std::string& msg) override;
+
 };
 
-}
+} // end namespace Yate::Wrapper
 
 #endif
