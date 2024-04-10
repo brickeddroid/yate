@@ -1,16 +1,38 @@
-#include "../iplugin.hpp"
+#include "../iuiplugin.hpp"
+#include "../../../utils/log.hpp"
 
-namespace YateCore{
+using namespace Yate::Utils;
 
-IPlugin::IPlugin(std::string name)
-    : ICore(name)
+namespace Yate::Core::Api {
+
+const std::string DOMAIN = "YCOREAPI";
+
+IUiPlugin::IUiPlugin(std::string name)
+    : IObject(name),
+      m_running(false),
+      m_status(Status::STOPPED)
 {}
 
-void IPlugin::set_status(STATUS status) {
+void IUiPlugin::set_status(Status status) {
     m_status = status;
 }
-void IPlugin::register_wrapper(IWrapper* const wrapper) {
-    m_wrapper = wrapper;
+
+void IUiPlugin::start(){
+    if(m_status != Status::STOPPED){
+        return;
+    }
+    log(Log_t::INFO, DOMAIN, "Starting %s\n", name().c_str());
+    set_status(Status::STARTING);
+    m_thread = std::thread(&IUiPlugin::start_plugin, this);
+    //m_thread.detach();
+    set_status(Status::RUNNING);
+    log(Log_t::INFO, DOMAIN, "%s started\n", name().c_str());
 }
 
-} // end namespace YateCore
+void IUiPlugin::stop(){
+    stop_plugin();
+    m_thread.join();
+    set_status(Status::STOPPED);
+}
+
+} // end namespace Yate::Core::Api

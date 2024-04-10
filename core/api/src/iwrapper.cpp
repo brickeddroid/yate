@@ -1,24 +1,25 @@
 #include "../iwrapper.hpp"
 
-namespace YateCore {
-IWrapper::IWrapper(const std::string& name)
-    : ICore(name),
-      m_document_handler(nullptr)
-{}
-
-void IWrapper::set_document_handler(DocumentHandler* const doc_handler)
+namespace Yate::Core::Api {
+IWrapper::IWrapper(/*Utils::IDecorator& successor,*/DocumentHandler& document_handler, IUiPlugin& uiplugin, const std::string& name)
+    : IObject(name),
+      /*Utils::IChainedDecorator(successor),*/
+      m_document_handler(document_handler)
 {
-    m_document_handler = doc_handler;
+    // DocumentHandler registration
+    document_handler.register_observer("file_opened", &IWrapper::onFileOpened, this);
+    document_handler.register_observer("open_file_list_change", &IWrapper::onOpenFileListChange, this);
+
+    register_observer("cmd_open_file", &DocumentHandler::onOpenFileCommand, &document_handler);
+    register_observer("cmd_close_file", &DocumentHandler::onCloseFileCommand, &document_handler);
+    register_observer("cmd_document_change", &DocumentHandler::onDocumentChangeCommand, &document_handler);
+
+
+    // IUiPlugin registration
+    uiplugin.register_observer("cmd_request", &IWrapper::onCommandRequest, this);
+
+    register_observer("file_opened", &IUiPlugin::onCoreUpdateMessage, &uiplugin);
+    register_observer("open_file_list_change", &IUiPlugin::onCoreUpdateMessage, &uiplugin);
 }
 
-const std::string& IWrapper::get_document(const std::string& file_path)
-{
-    if(m_document_handler != nullptr){
-        IDocument* const doc = m_document_handler->open(file_path);
-        //IDocument* const doc = doc_map[file_path]->open(file_path);
-        wrap_document(doc, m_data);
-    }
-    return m_data;
-}
-
-} // end namespace YateCore
+} // end namespace Yate::Core::Api
