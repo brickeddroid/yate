@@ -1,10 +1,75 @@
+let characterTimerId = -1;
+let changeString = "";
+let cursorPosition = -1;
+function sendInsertion(cursorPos, char){
+    if(characterTimerId != -1){
+        clearTimeout(characterTimerId);
+    }
+    changeString += char;
+    if(cursorPosition == -1){
+        cursorPosition = cursorPos;
+    }
+    characterTimerId = setTimeout(function(e){
+        console.log("send character string '" +  changeString + "'| POS: " + cursorPosition);
+        changeString = "";
+        cursorPosition = -1;
+        characterTimerId = -1;
+
+    }, 500);
+}
+let deletionTimerId = -1;
+let deletionCursorPosition = -1;
+let deletionLength = 0;
+function sendDeletion(cursorPos, length){
+    if(deletionTimerId != -1){
+        clearTimeout(deletionTimerId);
+    }
+    deletionLength += +length;
+
+    deletionTimerId = setTimeout(function(e){
+        deletionCursorPosition = cursorPos;
+        console.log(`send deletion | POS: ${deletionCursorPosition} | LEN: ${deletionLength}`);
+        deletionTimerId = -1;
+        deletionLength = 0;
+    }, 500);
+}
+
+function sendDocumentChange(filename, operation, cursorPos, length, char)
+{
+    if(operation != current_operation){
+        // clear timer
+        // send document change
+    }
+}
+
+function getCursorPosition(contentElement){
+    return contentElement.selectionStart;
+}
+
 function determineLanguage(filename){
+    return undefined;
     console.log(filename);
     if(filename == "/") return "html";
     const arr = filename.split('.')
     const ext = arr[arr.length-1] || "plaintext";
     return ext;
     //return file_ext;
+}
+
+const regexFileExtension = /(?:\.([^.]+))?$/;
+const regexHtml = /(HTM[XL]?)|(htm[xl]?)/;
+function mimeTypeFromFileExt(filepath)
+{
+    return "text/plain";
+    let mimetype = "text/plain";
+    let fileext = filename.split('.').pop();
+    if(fileext === filepath){
+        return filepath;
+    }
+
+    if(regexHtml.test(fileext)) mimetype = "text/html";
+    else if(regexJson.test(fileext)) mimetype = "application/html";
+    return mimetype;
 }
 
 function load_file(event){
@@ -23,42 +88,81 @@ function load_file(event){
 
 function open_file(filename)
 {
-    fetch('./open?file=' + filename)
-        .then((response) => {
-            response.text().then((data) => {
-                const regex = /(\<\/?[a-z]\>?)/
-                //const new_data = data.replace(regex, "<span style='color:red;'>$1</span>")
-                const lang = determineLanguage(filename);
-                const cel = document.querySelector("#textdiv");
-                if(hljs.getLanguage(lang) != undefined ){
-                    console.log(lang);
-                    const highlightedCode = hljs.highlight(
-                        data,
-                        { language: lang }
-                    ).value
-                    cel.innerHTML = highlightedCode;
-                } else {
-                    cel.innerHTML = data;
-                }
-                cel.language = lang;
-            });
-        })
-        .catch((err) => {  })
+    hasOpened = true;
+    (async () => {
+        const rawResponse = await fetch('/open', {
+            method: 'POST',
+            headers: {
+                'Accept': mimeTypeFromFileExt(filename),
+                'Content-Type': mimeTypeFromFileExt(filename)
+            },
+            body: JSON.stringify({cmd: "open", file: filename})
+        });
+        const content = await rawResponse.text();
+        /*
+        const tedit = document.querySelector("#text_editor");
+        tedit.value = content;
+        tedit.selectionStart = 0;
+        tedit.selectionEnd = 0;
+        tedit.parentElement.scrollTop = 0;
+        update_line_numbers(tedit);
+        */
+        //console.log(content);
+    })();
+}
+
+function getTextWidth(inputText) {
+    const computedStyle = getComputedStyle(document.documentElement);
+    font = computedStyle.getPropertyValue("--text-editor-font-size")
+        + " "
+        + computedStyle.getPropertyValue("--text-editor-font-family");
+    canvas = document.createElement("canvas");
+    context = canvas.getContext("2d");
+    context.font = font;
+    width = context.measureText(inputText).width;
+    return Math.ceil(width);
+}
+
+function update_line_numbers(textarea){
+    const lineNumbers = document.querySelector(".line-numbers");
+    lineNumbers.innerHTML = "";
+    const lines = textarea.value.split('\n');
+    const numberOfLines = lines.length;
+    for(let idx = 0; idx < numberOfLines; idx++){
+        let span = document.createElement("span");
+        span.innerHTML = idx+1;
+        lineNumbers.appendChild(span);
+        if(textarea.clientWidth < getTextWidth(lines[idx])){
+            //console.log("IDX " + idx + ": " + textarea.clientWidth + " <> " + getTextWidth(lines[idx]));
+            let additional_lines = Math.ceil(getTextWidth(lines[idx])/textarea.clientWidth) - 1;
+            for(let i = 0; i < additional_lines; i++){
+                let fillspan = document.createElement("span");
+                fillspan.innerHTML = '&#8627;';
+                lineNumbers.appendChild(fillspan);
+            }
+        }
+    };
 }
 
 function highlight(){
     //const lang = determineLanguage(filename);
-    const cel = document.querySelector("#textdiv");
-    const highlightedCode = hljs.highlight(
+    const cel = document.querySelector("#text_editor");
+    cel.innerText = hljs.highlight(
         cel.innerText,
         { language: cel.language }
     ).value
-    cel.innerHTML = highlightedCode;
 
 }
 
 function init_filehandle(){
-    open_file('/');
+    //setTimeout(function(){
+        open_file('./frontend/index.html');
+        //document.querySelector("#dir_tree").children[0].firstElementChild.classList.add("active");
+        let dir_tree = document.querySelector("#dir_tree");
+        if(dir_tree.children.length > 0){
+            dir_tree.children[0].firstElementChild.classList.add("active");
+        }
+    //}, 10);
 }
 
 function sendFile(file) {
@@ -95,7 +199,179 @@ function init_dropzone () {
     }
 }
 
+//var worker;
+
+function show_overlay(ov_type)
+{
+    let overlay = document.querySelector(".overlay");
+    overlay.classList.add("active");
+    let ov_concrete = document.querySelector("#ov_" + ov_type);
+    ov_concrete.classList.add("active");
+    //document.querySelector("body").appendChild(overlay);
+}
+
+function close_overlay(){
+    let overlay = document.querySelector(".overlay.active");
+    if(!overlay) return;
+    overlay.classList.remove("active");
+    let ov_concrete = document.querySelector(".ovl_impl.active");
+    ov_concrete.classList.remove("active");
+}
+
+var hasOpened = true;
+var event_source;
+
 function init(){
+
+    //worker = new Worker('/js/highlightWorker.js');
+    //process_highlight();
+
+    event_source = new EventSource("/event");
+
+    event_source.onconnect = (event) => {
+        console.log("Event connected");
+    }
+
+    event_source.onerror = (event) => {
+        console.error(event);
+    }
+
+    event_source.onmessage = (event) => {
+        console.error("Ping");
+    }
+
+    event_source.addEventListener("file_opened", function(e){
+        // TODO Need to determine origin of open request, if not this client, dont switch to the newly opened document
+        console.log("File opened received.");
+        if(!hasOpened) {
+            console.log("Not opened file, nothing todo...")
+            return;
+        }
+        hasOpened = false;
+        const tedit = document.querySelector("#text_editor");
+        let json = JSON.parse(e.data);
+        if(json.origin){
+            //if(json.origin != client_id)
+            return;
+        }
+        //console.log("Json origin != this");
+        //console.log(json.content);
+        tedit.value = json.content;
+        tedit.selectionStart = 0;
+        tedit.selectionEnd = 0;
+        tedit.parentElement.scrollTop = 0;
+        update_line_numbers(tedit);
+    });
+
+    event_source.addEventListener("open_file_list_change", function(e){
+        console.log("File list update received");
+		let json = JSON.parse(e.data);
+        let dir_tree = document.querySelector("#dir_tree");
+        dir_tree.innerHTML = "";
+        for(let i = 0; i < json.doc_list.length; i++){
+            let file = json.doc_list[i];
+            let li = document.createElement("li");
+            let a = document.createElement("a");
+            a.href = "#";
+            a.addEventListener("click", function(e){
+                open_file(this.innerText);
+                let prevActiveElement = this.parentElement.parentElement.querySelector(".active");
+                if(prevActiveElement){
+                    prevActiveElement.classList.remove("active");
+                }
+                this.classList.add("active");
+            });
+            a.innerText = file;
+            li.appendChild(a);
+            dir_tree.appendChild(li);
+        }
+    });
+
+
+    const text_editor = document.querySelector('#text_editor');
+    /*
+    let deletionLength = 0;
+    document.addEventListener("selectionchange", function(e){
+        if(window.getSelection().toString()){
+            deletionLength = window.getSelection().toString().length;
+        } else {
+            deletionLength = 0;
+        }
+    });
+    */
+/*
+    precode.addEventListener("keyup", function(e){
+        if(e.key === "Backspace"){
+            console.log("Backspace pressed");
+            ++deletionLength;
+        }
+    });
+*/
+
+    text_editor.addEventListener("input", function(e){
+        let cpos = getCursorPosition(this);
+
+        if(e.inputType === "insertText"){
+        }
+
+        update_line_numbers(this);
+    });
+    /*
+    text_editor.addEventListener("change", function(e){
+        console.log("Changed");
+        update_line_numbers(this);
+    });
+    */
+
+    const file_open = document.querySelector("#file_open");
+    file_open.addEventListener("click", function(e){
+        show_overlay("open");
+    });
+    const file_save = document.querySelector("#file_save");
+    file_save.addEventListener("click", function(e){
+        show_overlay("save");
+    });
+
+    const ov_close = document.querySelector(".ov_close");
+    ov_close.addEventListener("click", function(e){
+        close_overlay();
+    });
+
+    const about_yate = document.querySelector("#about_yate");
+    about_yate.addEventListener("click", function(e){
+        alert("©2024\r\nErik Günther\r\nTim Nau\r\nAdvanced Software Engineering\r\nDHBW Karlsruhe\r\n\r\nThis text editor or at least the core components were created keeping collaborative work in mind");
+    });
+/*
+    code.addEventListener("keypress", function(e){
+        console.log(e);
+    });
+
+*/
     init_dropzone();
     init_filehandle();
+
 }
+
+/*
+function process_highlight(){
+    const code = document.querySelector('code');
+    console.log("Worker load");
+    console.log(code);
+    worker.onmessage = (event) => {
+        console.log("Message received from worker");
+        const cursorPos = getCursorPosition(code);
+        code.innerHTML = event.data;
+        var range = document.createRange();
+        var sel = window.getSelection();
+
+        range.setStart(code.childNodes[2], 5);
+        range.collapse(true);
+
+        sel.removeAllRanges();
+        sel.addRange(range);
+
+    }
+
+    worker.postMessage(code.textContent);
+}
+*/

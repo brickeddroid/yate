@@ -4,28 +4,60 @@
         <meta charset="utf-8">
         <title></title>
         <link rel="stylesheet" href="css/style.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
         <script type="text/javascript" src="js/main.js"></script>
     </head>
     <body onload="init()">
       <header>
-        <h1>Y(et) A(nother) T(ext) E(ditor)</h1>
-        <div class="menu">
-            <input type="text"/>
-            <button onclick="open_file(this.previousElementSibling.value)">Open</button>
-            <input type="file" id="select_file" onchange="load_file(event)"/>
-        </div>
+        <ul id="navbar">
+            <li class="dropdown">
+                <a href="javascript:void(0)" class="dropbtn">File</a>
+                <div class="dropdown-content">
+                <a href="#">Settings</a>
+                <a href="#" id="file_open">Open...</a>
+                <a href="#" id="file_save">Save...</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="javascript:void(0)" class="dropbtn">Edit</a>
+                <div class="dropdown-content">
+                <a href="#">Copy</a>
+                <a href="#">Paste</a>
+                <a href="#">Cut</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="javascript:void(0)" class="dropbtn">About</a>
+                <div class="dropdown-content">
+                <a href="#" id="about_yate">Yate</a>
+                <a href="https://github.com/brickeddroid/yate" target="_blank">Yate source code</a>
+                </div>
+            </li>
+        </ul>
       </header>
       <main>
-          <div class="tree">
-              <ul id="dir_tree">
-              </ul>
-          </div>
-          <div class="main dropzone">
-              <pre contenteditable="true" class="hljs mb-0 p-4" onkeyup="highlight()"><code id="textdiv"></code></pre>
+            <div class="tree">
+                <ul id="dir_tree">
+                </ul>
+                <div id="sse_display"></div>
+            </div>
+          <div class="main editor dropzone">
+              <div class="line-numbers">
+                <span></span>
+              </div>
+              <textarea id="text_editor" contenteditable="true" spellcheck="false" wrap="hard"></textarea>
           </div>
       </main>
       <footer></footer>
+      <div class="overlay">
+            <button class="ov_close">&#128940;</button>
+            <div id="ov_open" class="ovl_impl">
+                <input type="text"/>
+                <button onclick="open_file(this.previousElementSibling.value); close_overlay();">Open</button>
+            </div>
+            <div id="ov_save" class="ovl_impl">
+                <input type="text"/>
+                <button>Save</button>
+            </div>
+      </div>
     </body>
 </html>
