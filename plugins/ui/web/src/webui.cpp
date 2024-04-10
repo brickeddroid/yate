@@ -1,39 +1,11 @@
 #include "../webui.hpp"
 #include "../../../../utils/log.hpp"
 
-using namespace YateUtils;
+using namespace Yate::Utils;
 
-namespace YatePlugin {
+namespace Yate::Plugin {
 
-WebUi::WebUi(const std::string& host, std::uint16_t port)
-  : UiPlugin("WebUi"),
-    m_server_socket(-1),
-    m_server(host, port)
-{
-
-}
-
-void WebUi::start()
-{
-    set_status(YateCore::IPlugin::STATUS::STARTING);
-    register_uris();
-
-    std::vector<std::future<void>> futures;
-    bool accepting = false;
-    m_server.initialize_socket();
-    m_server.open_socket(m_server_socket, accepting);
-    m_server.bind_socket(m_server_socket);
-    m_server.listen_socket(futures, m_server_socket, accepting);
-    set_status(YateCore::IPlugin::STATUS::RUNNING);
-}
-
-void WebUi::stop()
-{
-  //m_server.stop();
-    bool accepting = false;
-    m_server.close_socket(m_server_socket, accepting);
-    set_status(YateCore::IPlugin::STATUS::STOPPED);
-}
+constexpr const char* DOMAIN = "YPLUGIN:UI";
 
 std::string file_extension_to_mime_type(const std::string& file_ext){
     if(file_ext == "html" || file_ext == "htm"){
@@ -49,66 +21,45 @@ std::string file_extension_to_mime_type(const std::string& file_ext){
     return "text/plain";
 }
 
+WebUi::WebUi(const std::string& host, std::uint16_t port)
+  : Core::Api::IUiPlugin("WebUi"),
+    m_server(host, port),
+    m_event_source()
+{
+
+}
+
+void WebUi::onCoreUpdateMessage(const Utils::Event& event) {
+    log(Log_t::INFO, DOMAIN, "onCoreUpdateMessage Callback received\n");
+    auto& arguments = event.arguments;
+    if (arguments.size() > 0) {
+        try {
+            auto arg = std::any_cast<const std::string&>(arguments[0]);
+            std::string msg = "event: " + event.name + "\ndata:" + arg + "\n\n";
+            log(Log_t::VERBOSE, DOMAIN, "Event %s data casted.\n", event.name.c_str());
+            m_event_source.send_event(msg);
+        } catch(const std::bad_any_cast& e) {
+            log(Log_t::ERROR, DOMAIN, "Error: %s", e.what());
+        }
+    }
+    log(Log_t::DEBUG, DOMAIN, "Event %s emitted.\n", event.name.c_str());
+}
+
+void WebUi::start_plugin()
+{
+    register_uris();
+    m_server.start();
+}
+
+void WebUi::stop_plugin()
+{
+    m_server.stop();
+}
+
 void WebUi::register_uris()
 {
-    /*
-  auto provide_file = [](const HttpRequest& request) -> HttpResponse {
-    HttpResponse response(HttpStatusCode::Ok);
-    std::string mimeType;
-    std::getline(std::istringstream(request.header("Accept")), mimeType, ',');
-    if(!mimeType.empty()){
-      response.add_header("Content-Type", mimeType);
-    } else {
-      response.add_header("Content-Type", "text/plain");
-    }
-
-    log(Log_t::DEBUG, "Request URI %s\n", request.uri().path().c_str());
-    if(request.uri().path() == "/"){
-      response.set_file_path("frontend/index.html");
-    } else {
-      response.set_file_path("frontend" + request.uri().path());
-    }
-
-    return response;
-  };
-
-  auto provide_dir = [](const HttpRequest& request) -> HttpResponse {
-    HttpResponse response(HttpStatusCode::Ok);
-    std::string mimeType;
-    std::getline(std::istringstream(request.header("Accept")), mimeType, ',');
-    if(!mimeType.empty()){
-      response.SetHeader("Content-Type", mimeType);
-    } else {
-      response.SetHeader("Content-Type", "text/plain");
-    }
-    return response;
-  };
-
-  auto provide_open_file = [this](const HttpRequest& request) -> HttpResponse {
-
-      HttpResponse response(HttpStatusCode::Ok);
-      std::string file_name = request.query_parameter("file");
-      log(Log_t::INFO, "File name:\n%s", file_name.c_str());
-      response.SetHeader("Content-Type", "application/json");
-      std::string content =  m_wrapper->get_document(file_name);
-      log(Log_t::INFO, "Content:\n%s", content.c_str());
-      response.SetContent(content);
-      return response;
-  };
-
-  m_server.register_uri_handler("/", HttpMethod::HEAD, provide_file);
-  m_server.register_uri_handler("/", HttpMethod::GET, provide_file);
-
-  m_server.register_uri_handler("/css/style.css", HttpMethod::HEAD, provide_file);
-  m_server.register_uri_handler("/css/style.css", HttpMethod::GET, provide_file);
-
-  m_server.register_uri_handler("/open", HttpMethod::HEAD, provide_open_file);
-  m_server.register_uri_handler("/open", HttpMethod::GET, provide_open_file);
-  */
-
-    auto provide_file = [](const HttpRequest& http_request) -> HttpResponse {
-        std::cout << "Preparing file for serving..." << http_request.path() << std::endl;
-        HttpResponse http_response;
+    auto on_receive_frontend_file_request = [](const HttpRequest& http_request, HttpResponse& http_response) {
+        log(Log_t::INFO, DOMAIN, "Preparing for delivery of '%s'\n", http_request.path().c_str());
         http_response.set_status_code(HttpStatusCode::Ok);
         const std::string& accept_content = http_request.header("Accept");
         std::string path = http_request.path();
@@ -120,70 +71,49 @@ void WebUi::register_uris()
         }
 
         const std::string file_ext = path.substr(path.find('.', 2)+1);
-        log(Log_t::DEBUG, "File extension: %s\n", file_ext.c_str());
+        log(Log_t::DEBUG, DOMAIN, "File extension: %s\n", file_ext.c_str());
         std::string mime_type = file_extension_to_mime_type(file_ext);//accept_content.substr(0, accept_content.find(","));
 
         if (std::ifstream ifs { path }) {
-            std::cout << "File opened " << http_request.path() << std::endl;
+            log(Log_t::DEBUG, DOMAIN, "File %s opened\n", path.c_str());
             std::string data((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-            // use data here
-            //std::cout << data << '\n';
             http_response.set_content(data);
         } else {
             http_response.set_status_code(HttpStatusCode::NotFound);
-            std::cout << "Cannot open file\n";
+            log(Log_t::ERROR, DOMAIN, "Cannot open file %s\n", path.c_str());
         }
         http_response.add_header("Content-Length", std::to_string(http_response.content().length()));
         http_response.add_header("Content-Type", mime_type);
         return http_response;
     };
 
-    auto provide_open_file = [](const HttpRequest& http_request) -> HttpResponse {
-        std::cout << "Preparing file for serving... " << http_request.query_parameter("file") << std::endl;
-        HttpResponse http_response;
+    auto on_receive_file_cmd_request = [this](const HttpRequest& http_request, HttpResponse& http_response) {
+        log(Log_t::DEBUG, DOMAIN, "Command request received\n");
+
+        emit_event("cmd_request", http_request.content());
+
         http_response.set_status_code(HttpStatusCode::Ok);
-        const std::string& accept_content = http_request.header("Accept");
-        std::string mime_type = accept_content.substr(0, accept_content.find(","));
-        std::string path = http_request.query_parameter("file");
-        if(path == "/"){
-            path = "./frontend/index.html";
-        } else {
-            path.insert(0, "./frontend");
-        }
-
-        if (std::ifstream ifs { path }) {
-            std::cout << "File opened " << path << std::endl;
-            std::string data((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-            // use data here
-            //std::cout << data << '\n';
-            http_response.set_content(data);
-        } else {
-            http_response.set_status_code(HttpStatusCode::NotFound);
-            std::cout << "Cannot open file " << path << std::endl;
-        }
+        http_response.set_version(HttpVersion::Http_11);
         http_response.add_header("Content-Length", std::to_string(http_response.content().length()));
-        http_response.add_header("Content-Type", mime_type);
+        log(Log_t::VERBOSE, DOMAIN, "Command request processed\n");
         return http_response;
     };
 
-    auto post_file = [](const HttpRequest& http_request) -> HttpResponse {
-        HttpResponse http_response;
-        http_response.set_status_code(HttpStatusCode::Created);
-        http_response.add_header("Content-Length", "0");
-        log(Log_t::DEBUG, "POST REQUEST");
-        //http_request.content();
+    m_server.register_uri_handler("/", HttpMethod::GET, on_receive_frontend_file_request);
+    m_server.register_uri_handler("/index.html", HttpMethod::GET, on_receive_frontend_file_request);
+    m_server.register_uri_handler("/css/style.css", HttpMethod::GET, on_receive_frontend_file_request);
+    m_server.register_uri_handler("/js/main.js", HttpMethod::GET, on_receive_frontend_file_request);
+    m_server.register_uri_handler("/js/highlightWorker.js", HttpMethod::GET, on_receive_frontend_file_request);
 
-        return http_response;
-    };
+    m_server.register_uri_handler("/open", HttpMethod::POST, on_receive_file_cmd_request);
 
-    m_server.register_uri_handler("/", HttpMethod::GET, provide_file);
-    m_server.register_uri_handler("/index.html", HttpMethod::GET, provide_file);
-    m_server.register_uri_handler("/index.html", HttpMethod::POST, post_file);
-    m_server.register_uri_handler("/css/style.css", HttpMethod::GET, provide_file);
-    m_server.register_uri_handler("/css/prism.css", HttpMethod::GET, provide_file);
-    m_server.register_uri_handler("/js/main.js", HttpMethod::GET, provide_file);
-    m_server.register_uri_handler("/js/prism.js", HttpMethod::GET, provide_file);
-    m_server.register_uri_handler("/open", HttpMethod::GET, provide_open_file);
+    m_server.register_event("/event", &m_event_source);
 }
-
+/*
+void WebUi::process(std::string& msg){
+    log(Log_t::INFO, DOMAIN, "Emit server sent event...\n");
+    m_event_source.send_event(msg);
+    log(Log_t::INFO, DOMAIN, "Event emitted.\n");
 }
+*/
+} // end namespace Yate::Plugin

@@ -1,20 +1,28 @@
 #ifndef WEBUI_HPP
 #define WEBUI_HPP
 
-#include <uiplugin.hpp>
+#include <iuiplugin.hpp>
 #include <httpserver.hpp>
 
-namespace YatePlugin {
-class WebUi : public UiPlugin {
+namespace Yate::Plugin {
+
+class WebUi : public Core::Api::IUiPlugin {
 public:
     explicit WebUi(const std::string& host, std::uint16_t port);
-    virtual void start();
-    virtual void stop();
+
+    virtual void onCoreUpdateMessage(const Utils::Event& event) override;
+protected:
+    virtual void start_plugin() override;
+    virtual void stop_plugin() override;
+
 private:
-    SOCKET m_server_socket;
-    HttpServer m_server;
+    Http::Server m_server;
+    Http::EventSource m_event_source;
 
     void register_uris();
+
+    //virtual void process(std::string& msg);
 };
-}
+
+} // end namespace Yate::Plugin
 #endif
