@@ -1,30 +1,60 @@
-#ifndef SUBJECT_HPP
-#define SUBJECT_HPP
+#ifndef OBSERVABLESUBJECT_HPP
+#define OBSERVABLESUBJECT_HPP
 
 #include <vector>
+#include <string>
+#include <utility>
 #include <functional>
+#include <map>
+#include <list>
+#include <future>
+#include <mutex>
+#include <any>
+#include <exception>
 
-class Observer;
+#include "log.hpp"
 
-namespace YateUtils {
+namespace Yate::Utils {
 
-template <class T>
-class Subject {
+class Event {
 public:
-    typedef std::function<void(T const&)> observer_callback_t;
-    void attach_observer(observer_callback_t observer){
-        m_observers.emplace_back(std::move(&observer));
-    }
-    void detach_observer(observer_callback_t observer){
-        m_observers.erase(&observer);
-    }
-protected:
-    void notify();
+    std::string name;
+    std::vector<std::any> arguments;
 
-private:
-    std::vector<observer_callback_t*> m_observers;
+    template<typename... Args>
+    Event(const std::string& name_, Args&&... args) : name(name_) {
+        arguments.reserve(sizeof...(Args));
+        (arguments.emplace_back(std::any(args)), ...);
+    }
 };
 
-} // endof namespace YateUtils
+// Klasse Subject
+class ObservableSubject {
+public:
+    using ObserverFunction = std::function<void(const Event&)>;
 
+    template<typename ObjectType>
+    void register_observer(const std::string& eventName, void (ObjectType::*memberFunction)(const Event&), ObjectType* object) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_observers[eventName].emplace_back(std::bind(memberFunction, object, std::placeholders::_1));
+    }
+
+    template<typename... Args>
+    void emit_event(const std::string& eventName, Args&&... args) {
+        Event event(eventName, std::forward<Args>(args)...);
+        notify_observers(eventName, event);
+    }
+
+private:
+    std::vector<std::future<void>> m_notifications_in_execution;
+
+
+    std::map<std::string, std::list<ObserverFunction>> m_observers;
+    std::mutex m_mutex;
+
+    void clear_notifications();
+    void notify_observers(const std::string& eventName, const Event& event);
+};
+
+} // end namespace Yate::Utils
 #endif
