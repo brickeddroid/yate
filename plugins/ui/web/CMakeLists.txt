@@ -12,8 +12,8 @@ ExternalProject_Add(httpserver
     SOURCE_DIR ${EXTERNAL_INSTALLATION_DIR}/httpserver
     BINARY_DIR ${EXTERNAL_INSTALLATION_DIR}/httpserver-build
     UPDATE_COMMAND ${GIT_EXECUTABLE} pull
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" <SOURCE_DIR> # Keine Konfiguration notwendig, wenn das externe Projekt bereits ein CMake-Setup hat
-    BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR>  # Hier ändern Sie den Build-Befehl entsprechend
+    CONFIGURE_COMMAND "" #${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" <SOURCE_DIR> # Keine Konfiguration notwendig, wenn das externe Projekt bereits ein CMake-Setup hat
+    BUILD_COMMAND "" #${CMAKE_COMMAND} --build <BINARY_DIR>  # Hier ändern Sie den Build-Befehl entsprechend
     INSTALL_COMMAND "" # Keine Installation notwendig
     LOG_DOWNLOAD ON
 )
@@ -34,44 +34,30 @@ ExternalProject_Get_Property(httpserver BINARY_DIR)
 #)
 target_sources(plugins
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/webui.cpp
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/webui.cpp"
+        "${EXTERNAL_INSTALLATION_DIR}/httpserver/src/httpserver.cpp"
+        "${EXTERNAL_INSTALLATION_DIR}/httpserver/src/httpmessage.cpp"
 )
-add_dependencies(plugins httpserver)
+#add_dependencies(plugins httpserver)
 
 #find_library(HTTP_LIBRARY NAMES httpserver)
 #target_link_libraries(webui PUBLIC ${HTTP_LIBRARY})
 # Fügen Sie das Include-Verzeichnis der externen Bibliothek hinzu
 target_include_directories(plugins
     PUBLIC
-        "${CMAKE_CURRENT_SOURCE_DIR}"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src"
-#    PRIVATE
- #       ${EXTERNAL_INSTALLATION_DIR}/httpserver
         "${EXTERNAL_INSTALLATION_DIR}/httpserver/include"
- #       ${EXTERNAL_INSTALLATION_DIR}/httpserver/src
+        "${CMAKE_CURRENT_SOURCE_DIR}"
 )
-
-#message(STATUS "MeineBibliothek wird erstellt mit den Quellen: ${CMAKE_CURRENT_SOURCE_DIR}/quelle1.cpp, ${CMAKE_CURRENT_SOURCE_DIR}/quelle2.cpp")
-#target_link_libraries(webui PUBLIC HttpServer)
 
 target_link_directories(plugins
     PUBLIC
         ${BINARY_DIR}
 )
 
-#target_link_libraries(plugins
-#    PUBLIC
-#        "${BINARY_DIR}/libhttpserver.a"  # Hier den tatsächlichen Namen der Bibliothek angeben
-#)
-
 get_target_property(MY_TARGET_SOURCES plugins INCLUDE_DIRECTORIES)
 message(STATUS "Target sources of webui: ${MY_TARGET_SOURCES}")
 
 get_target_property(MY_LINK_LIBS plugins LINK_LIBRARIES)
 message(STATUS "Linked libs of webui: ${MY_LINK_LIBS}")
-
-message("       ${CMAKE_CURRENT_SOURCE_DIR}")
-message("       ${BINARY_DIR}")
-message("       ${plugins}")
 
 file(COPY ./frontend DESTINATION ${CMAKE_BINARY_DIR})
