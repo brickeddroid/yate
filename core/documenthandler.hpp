@@ -1,34 +1,36 @@
 #ifndef DOCUMENTHANDLER_HPP
 #define DOCUMENTHANDLER_HPP
 
-#include "interfaces/idocument.hpp"
-#include "interfaces/idocumentfactory.hpp"
+#include "document.hpp"
+#include "api/ifileiofactory.hpp"
 
 #include <string>
 #include <map>
 
-namespace YateCore {
 
-class DocumentHandler {
+namespace Yate::Core {
+
+class DocumentHandler : public Api::IObject {
 private:
-    std::map<std::string, IDocument*> m_documents;
+    std::map<std::string, Document> m_documents;
+    Api::IFileIOFactory& m_fileio_factory;
     
-    IDocument* m_current_document;
-    IDocumentFactory* m_factory;
 public:
-    DocumentHandler(IDocumentFactory* const factory);
+    DocumentHandler(Api::IFileIOFactory& fileio_factory);
 
-    IDocument* const open(const std::string& filepath);
+    void open_file(const std::string& filepath, std::shared_ptr<Api::IFileReader> filereader);
     
-    void close(const std::string& filepath);
+    void close_file(const std::string& filepath);
     
-    IDocument * const get_current_doc();
-    
-    const std::map<std::string, IDocument*>& get_documents();
+    const std::map<std::string, Document>& get_open_documents();
 
-    void set_factory(IDocumentFactory* const factory);
-  
+    Document& get_document(const std::string& filepath);
+
+    void onOpenFileCommand(const Utils::Event& event);
+    void onCloseFileCommand(const Utils::Event& event);
+    void onDocumentChangeCommand(const Utils::Event& event);
 };
-} // end namespace YateCore
+
+} // end namespace Yate::Core
 
 #endif
