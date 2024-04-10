@@ -49,7 +49,7 @@
       </main>
       <footer></footer>
       <div class="overlay">
-            <button class="ov_close">&#128940;</button>
+            <button id="ov_close" class="ov_close">&#128940;</button>
             <div id="ov_open" class="ovl_impl">
                 <input type="text"/>
                 <button onclick="open_file(this.previousElementSibling.value); close_overlay();">Open</button>
@@ -57,6 +57,14 @@
             <div id="ov_save" class="ovl_impl">
                 <input type="text"/>
                 <button>Save</button>
+            </div>
+            <div id="ov_credits" class="ovl_impl">
+                <h3>Credits ©2024 Yate</h3>
+                <p>Erik Günther</p>
+                <p>Tim Nau</p>
+                <p>Advanced Software Engineering</p>
+                <p>DHBW Karlsruhe</p>
+                <p wrap="hard">This text editor or at least the core components were created keeping collaborative work in mind</p>
             </div>
       </div>
     </body>
