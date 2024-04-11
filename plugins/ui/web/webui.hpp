@@ -20,8 +20,6 @@ private:
     Http::EventSource m_event_source;
 
     void register_uris();
-
-    //virtual void process(std::string& msg);
 };
 
 } // end namespace Yate::Plugin

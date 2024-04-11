@@ -24,7 +24,6 @@ void IUiPlugin::start(){
     log(Log_t::INFO, DOMAIN, "Starting %s\n", name().c_str());
     set_status(Status::STARTING);
     m_thread = std::thread(&IUiPlugin::start_plugin, this);
-    //m_thread.detach();
     set_status(Status::RUNNING);
     log(Log_t::INFO, DOMAIN, "%s started\n", name().c_str());
 }

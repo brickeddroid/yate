@@ -109,11 +109,5 @@ void WebUi::register_uris()
 
     m_server.register_event("/event", &m_event_source);
 }
-/*
-void WebUi::process(std::string& msg){
-    log(Log_t::INFO, DOMAIN, "Emit server sent event...\n");
-    m_event_source.send_event(msg);
-    log(Log_t::INFO, DOMAIN, "Event emitted.\n");
-}
-*/
+
 } // end namespace Yate::Plugin

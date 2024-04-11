@@ -20,6 +20,5 @@ public:
 };
 
 } // end namespace Yate::Core::Api
-//static_assert( is_trivially_copyable_v<Yate::Core::Api::IFileReader>);
 
 #endif

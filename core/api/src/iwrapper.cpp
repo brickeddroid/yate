@@ -1,9 +1,8 @@
 #include "../iwrapper.hpp"
 
 namespace Yate::Core::Api {
-IWrapper::IWrapper(/*Utils::IDecorator& successor,*/DocumentHandler& document_handler, IUiPlugin& uiplugin, const std::string& name)
+IWrapper::IWrapper(DocumentHandler& document_handler, IUiPlugin& uiplugin, const std::string& name)
     : IObject(name),
-      /*Utils::IChainedDecorator(successor),*/
       m_document_handler(document_handler)
 {
     // DocumentHandler registration

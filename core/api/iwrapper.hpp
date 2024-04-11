@@ -7,7 +7,7 @@
 #include "../document.hpp"
 
 namespace Yate::Core::Api {
-class IWrapper : public IObject/*, public Utils::IChainedDecorator*/ {
+class IWrapper : public IObject {
 protected:
     DocumentHandler& m_document_handler;
 public:

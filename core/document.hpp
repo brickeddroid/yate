@@ -1,7 +1,7 @@
 #ifndef DOCUMENT_HPP
 #define DOCUMENT_HPP
 
-#include "../utils/queue.hpp"
+#include "../utils/threadsafequeue.hpp"
 #include "api/iobject.hpp"
 
 #include <vector>
@@ -70,7 +70,7 @@ private:
     encoding_t m_encoding;
 
     std::vector<DocumentChange> m_change_history;
-    Utils::Queue<DocumentChange> m_change_queue;
+    Utils::ThreadSafeQueue<DocumentChange> m_change_queue;
 public:
     //Document() = default;
     Document(std::string filename = "Document");
@@ -93,7 +93,7 @@ public:
 
     }
 
-    void update();
+    void update_history();
     const std::string& content() const { return m_content; }
     void set_content(const std::string& content);
 

@@ -5,7 +5,6 @@
 #include "../../utils/observablesubject.hpp"
 
 
-
 namespace Yate::Core::Api {
 
 class IObject : public Utils::ObservableSubject {
@@ -19,8 +18,6 @@ public:
 
     inline const std::string& name() { return m_name; }
 };
-
-
 
 } // end namespace Yate::Core::Api
 

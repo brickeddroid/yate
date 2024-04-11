@@ -28,7 +28,6 @@ public:
     }
 };
 
-// Klasse Subject
 class ObservableSubject {
 public:
     using ObserverFunction = std::function<void(const Event&)>;
@@ -47,7 +46,6 @@ public:
 
 private:
     std::vector<std::future<void>> m_notifications_in_execution;
-
 
     std::map<std::string, std::list<ObserverFunction>> m_observers;
     std::mutex m_mutex;

@@ -24,16 +24,24 @@ void Document::enqueue_document_change(DocumentChange& document_change)
     m_change_queue.push(std::move(document_change));
 }
 
-void Document::update(){
-    if(m_change_queue.empty()) return;
-    while(!m_change_queue.empty()){
-        m_change_history.emplace_back(m_change_queue.pop().value_or(DocumentChange()));
+void Document::update_history(){
+    const std::lock_guard<std::mutex> lock(m_doc_mutex);
+    int count = 0;
+    auto change = m_change_queue.pop();
+    while(change){
+        m_change_history.emplace_back(*change);
+        change = m_change_queue.pop();
+        ++count;
+        // TODO
     }
-    //publish("history");
-    emit_event("history_change");
+
+    if(count > 0){
+        emit_event("history_change");
+    }
 }
 
 void Document::set_content(const std::string& content) {
+    const std::lock_guard<std::mutex> lock(m_doc_mutex);
     log(Log_t::DEBUG, DOMAIN, "Move content to %s and notify observers.\n", name().c_str());
     m_content = std::move(content);
     emit_event("content_change");
