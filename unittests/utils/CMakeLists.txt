@@ -1,16 +1,16 @@
 enable_testing()
 
 add_executable(
-  core_test
+  utils_test
   test.cpp
 )
 
 target_link_libraries(
-  core_test
+  utils_test
   GTest::gtest_main
-  core
+  utils
 )
 
 include(GoogleTest)
-gtest_discover_tests(core_test)
+gtest_discover_tests(utils_test)
 

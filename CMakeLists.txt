@@ -18,11 +18,6 @@ include_directories(${PROJECT_BINARY_BIN})
 
 include(ExternalProject)
 
-if(YATE_PROJECT_BUILD_TESTING)
-  enable_testing()
-  # or alternatively, `include(CTest)`, if you want to use CDash
-  # https://cmake.org/cmake/help/book/mastering-cmake/chapter/CDash.html
-endif()
 #include_directories(src/plugins/)
 #link_directories(src/plugins/)
 #
@@ -33,6 +28,14 @@ add_subdirectory(utils)
 add_subdirectory(core)
 add_subdirectory(plugins)
 add_subdirectory(wrapper)
+
+set (YATE_PROJECT_BUILD_TESTING true)
+if(YATE_PROJECT_BUILD_TESTING)
+  enable_testing()
+  # or alternatively, `include(CTest)`, if you want to use CDash
+  # https://cmake.org/cmake/help/book/mastering-cmake/chapter/CDash.html
+  add_subdirectory(unittests)
+endif()
 
 add_executable(${EXECUTABLE_NAME} ${SRC_MAIN})
 
