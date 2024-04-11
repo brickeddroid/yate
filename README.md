@@ -5,12 +5,14 @@
 - Download this repository
 - Unpack it
 - Change into its directory
-- Make a new directory (i.e. 'build')
-- Change into the newly created directory and execute:
-- ```
+- Open a terminal (For <b>linux</b> users):<br>
+  ```
+  mkdir build && cd build
   cmake ..
   make
   ```
+
+(Windows was not tested so far)
 
 ### Run it
 ```./yate``` (or with Windows ```.\yate```)<br>
@@ -18,6 +20,7 @@ With a webbrowser visit ```localhost:8082```
 
 ### Dependencies
 #### Internal
-HttpServer: https://github.com/brickeddroid/small_httpserver
+Small asynchronous http server created for this project:<br>
+https://github.com/brickeddroid/small_httpserver
 #### External
 Json library: https://github.com/nlohmann/json
