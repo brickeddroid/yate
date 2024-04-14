@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.14)
 
 project(Yate
   VERSION 0.1.0
@@ -11,6 +11,8 @@ set (EXECUTABLE_NAME "yate")
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
+
+set(EXTERNAL_INSTALLATION_DIR ${CMAKE_BINARY_DIR}/thirdparty)
 
 configure_file(config.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/config.hpp)
 include_directories(${PROJECT_BINARY_BIN})

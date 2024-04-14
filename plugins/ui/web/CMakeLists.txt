@@ -1,7 +1,3 @@
-cmake_minimum_required(VERSION 3.14)
-
-set(EXTERNAL_INSTALLATION_DIR ${CMAKE_BINARY_DIR}/thirdparty/httpserver/src)
-
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -19,14 +15,16 @@ FetchContent_MakeAvailable(httpserver)
 target_sources(plugins
     PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src/webui.cpp"
+
         "${EXTERNAL_INSTALLATION_DIR}/httpserver/src/httpserver.cpp"
         "${EXTERNAL_INSTALLATION_DIR}/httpserver/src/httpmessage.cpp"
 )
 
 target_include_directories(plugins
+    INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}
     PUBLIC
         "${EXTERNAL_INSTALLATION_DIR}/httpserver/include"
-        "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
 target_link_directories(plugins
