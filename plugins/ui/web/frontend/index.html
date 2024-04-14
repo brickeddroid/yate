@@ -52,7 +52,7 @@
             <button id="ov_close" class="ov_close">&#128940;</button>
             <div id="ov_open" class="ovl_impl">
                 <input type="text"/>
-                <button onclick="open_file(this.previousElementSibling.value); close_overlay();">Open</button>
+                <button onclick="open_file('cmd_open_file', this.previousElementSibling.value, 'local'); close_overlay();">Open</button>
             </div>
             <div id="ov_save" class="ovl_impl">
                 <input type="text"/>

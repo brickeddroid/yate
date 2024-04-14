@@ -3,6 +3,8 @@
     --text-editor-font-size: 12px;
     --text-editor-lineno-size: 11px;
     --text-editor-font-family: monospace;
+    --text-editor-line-height: 21px;
+    --text-editor-show-lines: 1;
 }
 
 * {
@@ -56,7 +58,8 @@ main {
 }
 
 textarea {
-    line-height: 21px;
+    line-height: var(--text-editor-line-height);
+    height: calc(var(--text-editor-line-height) * var(--text-editor-show-lines));
     padding: 0;
     border: 0;
     background: #282a3a;
@@ -66,12 +69,14 @@ textarea {
     width: 100%;
     font-size: var(--text-editor-font-size);
     font-family: var(--text-editor-font-family);
+    overflow: hidden;
+
 }
 
 .editor {
     display: flex;
     gap: 10px;
-    line-height: 21px;
+    line-height: var(--text-editor-line-height);
     background: #282a3a;
     border-radius: 2px;
     padding: 20px 10px;
@@ -92,13 +97,13 @@ textarea {
     counter-increment: linenumber;
     font-size: var(--text-editor-lineno-size);
     font-family: var(--text-editor-font-family);
-    line-height: 21px;
+    line-height: var(--text-editor-line-height);
     display: block;
     color: #506882;
 }
 
 .line-numbers, textarea {
-    height: 9999px;
+    /*height: 9999px;*/
 }
 
 

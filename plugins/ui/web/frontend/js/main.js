@@ -83,23 +83,23 @@ function load_file(event){
     open_file(objectUrl);
 }
 
-function open_file(filename)
+function open_file(cmd, filename, filereadwrite)
 {
     hasOpened = true;
     (async () => {
-        const rawResponse = await fetch('/open', {
+        const rawResponse = await fetch('/cmd', {
             method: 'POST',
             headers: {
                 'Accept': mimeTypeFromFileExt(filename),
                 'Content-Type': mimeTypeFromFileExt(filename)
             },
-            body: JSON.stringify({cmd: "open", file: filename})
+            body: JSON.stringify({cmd: cmd, file: filename, filerw: filereadwrite })
         });
         const content = await rawResponse.text();
     })();
 }
 
-function getTextWidth(inputText) {
+function getTextWidth(inputLine) {
     const computedStyle = getComputedStyle(document.documentElement);
     font = computedStyle.getPropertyValue("--text-editor-font-size")
         + " "
@@ -107,7 +107,7 @@ function getTextWidth(inputText) {
     canvas = document.createElement("canvas");
     context = canvas.getContext("2d");
     context.font = font;
-    width = context.measureText(inputText).width;
+    width = context.measureText(inputLine).width;
     return Math.ceil(width);
 }
 
@@ -129,10 +129,13 @@ function update_line_numbers(textarea){
             }
         }
     };
+    document.querySelector(":root").style.setProperty("--text-editor-show-lines", numberOfLines);
+    //console.log();
+    //textarea.style.height = `calc(var(--text-editor-line-height)*)`;
 }
 
 function init_filehandle(){
-   open_file('./frontend/index.html');
+   open_file('cmd_open_file', './frontend/index.html', 'local');
    let dir_tree = document.querySelector("#dir_tree");
    if(dir_tree.children.length > 0){
        dir_tree.children[0].firstElementChild.classList.add("active");
@@ -238,7 +241,7 @@ function init(){
             let a = document.createElement("a");
             a.href = "#";
             a.addEventListener("click", function(e){
-                open_file(this.innerText);
+                open_file('cmd_open_file', this.innerText, 'local');
                 let prevActiveElement = this.parentElement.parentElement.querySelector(".active");
                 if(prevActiveElement){
                     prevActiveElement.classList.remove("active");
