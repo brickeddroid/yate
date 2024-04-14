@@ -29,22 +29,6 @@ WebUi::WebUi(const std::string& host, std::uint16_t port)
 
 }
 
-void WebUi::onCoreUpdateMessage(const Utils::Event& event) {
-    log(Log_t::INFO, DOMAIN, "onCoreUpdateMessage Callback received\n");
-    auto& arguments = event.arguments;
-    if (arguments.size() > 0) {
-        try {
-            auto arg = std::any_cast<const std::string&>(arguments[0]);
-            std::string msg = "event: " + event.name + "\ndata:" + arg + "\n\n";
-            log(Log_t::VERBOSE, DOMAIN, "Event %s data casted.\n", event.name.c_str());
-            m_event_source.send_event(msg);
-        } catch(const std::bad_any_cast& e) {
-            log(Log_t::ERROR, DOMAIN, "Error: %s", e.what());
-        }
-    }
-    log(Log_t::DEBUG, DOMAIN, "Event %s emitted.\n", event.name.c_str());
-}
-
 void WebUi::start_plugin()
 {
     register_uris();
@@ -54,6 +38,11 @@ void WebUi::start_plugin()
 void WebUi::stop_plugin()
 {
     m_server.stop();
+}
+
+void WebUi::notify_frontend(const std::string& event, const std::string& msg)
+{
+    m_event_source.send_event("event: " + event + "\ndata:" + msg + "\n\n");
 }
 
 void WebUi::register_uris()
@@ -103,9 +92,9 @@ void WebUi::register_uris()
     m_server.register_uri_handler("/index.html", HttpMethod::GET, on_receive_frontend_file_request);
     m_server.register_uri_handler("/css/style.css", HttpMethod::GET, on_receive_frontend_file_request);
     m_server.register_uri_handler("/js/main.js", HttpMethod::GET, on_receive_frontend_file_request);
-    m_server.register_uri_handler("/js/highlightWorker.js", HttpMethod::GET, on_receive_frontend_file_request);
+    //m_server.register_uri_handler("/js/highlightWorker.js", HttpMethod::GET, on_receive_frontend_file_request);
 
-    m_server.register_uri_handler("/open", HttpMethod::POST, on_receive_file_cmd_request);
+    m_server.register_uri_handler("/cmd", HttpMethod::POST, on_receive_file_cmd_request);
 
     m_server.register_event("/event", &m_event_source);
 }

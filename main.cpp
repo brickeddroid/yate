@@ -20,6 +20,14 @@
 using namespace Yate;
 using namespace Utils;
 
+using DocumentHandler = Core::DocumentHandler;
+using IUiPlugin = Core::Api::IUiPlugin;
+using IWrapper = Core::Api::IWrapper;
+using JsonWrapper = Wrapper::JsonWrapper;
+using WebUi = Plugin::WebUi;
+using FileIOFactory = Plugin::FileIOFactory;
+
+
 const std::string DOMAIN = "YMAIN";
 /*
 void set_term_quiet_input(){
@@ -32,22 +40,42 @@ void set_term_quiet_input(){
 }
 */
 int main(int argc, char* argv[]){
-    Utils::LogLevel = Log_t::INFO;
+    Utils::LogLevel = Log_t::SILLY;
 
     log(Log_t::INFO, DOMAIN, "Welcome to YATE\n");
-    Plugin::FileIOFactory factory;
-    Core::DocumentHandler document_handler(factory);
-    Plugin::WebUi webui_plugin("0.0.0.0", 8082);
 
-    // Make connection between core and outer ui plugin
-    Wrapper::JsonWrapper json_wrapper(document_handler, webui_plugin);
-    //webui_plugin.register_wrapper(&json_wrapper);
+    FileIOFactory factory;
+    DocumentHandler document_handler(factory);
+    JsonWrapper json_wrapper;
+    WebUi webui_plugin("0.0.0.0", 8082);
+
+    IWrapper* wrapper = &json_wrapper;
+    IUiPlugin* uiplugin = &webui_plugin;
+    // Connection between components through observer registration
+
+    // DocumentHandler => IWrapper
+    document_handler.register_observer("file_opened", &IWrapper::onFileOpened, wrapper);
+    document_handler.register_observer("open_file_list_change", &IWrapper::onOpenFileListChange, wrapper);
+
+    // IWrapper => DocumentHandler
+    json_wrapper.register_observer("cmd_open_file", &DocumentHandler::onOpenFileCommand, &document_handler);
+    json_wrapper.register_observer("cmd_close_file", &DocumentHandler::onCloseFileCommand, &document_handler);
+    json_wrapper.register_observer("cmd_document_change", &DocumentHandler::onDocumentChangeCommand, &document_handler);
+
+
+    // IUiPlugin => IWrapper
+    webui_plugin.register_observer("cmd_request", &IWrapper::onCommandRequest, wrapper);
+
+    // IWrapper => IUiPlugin
+    json_wrapper.register_observer("file_opened", &IUiPlugin::onCoreUpdateMessage, uiplugin);
+    json_wrapper.register_observer("open_file_list_change", &IUiPlugin::onCoreUpdateMessage, uiplugin);
 
 
     try {
         webui_plugin.start();
-    } catch(std::exception& e) {
+    } catch(std::runtime_error& e) {
         log(Log_t::ERROR, "%s\n", e.what());
+        throw;
     }
 /*
     if(argv[1]){

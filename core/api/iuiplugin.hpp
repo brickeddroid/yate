@@ -24,12 +24,14 @@ public:
 
     IUiPlugin(std::string name = "PluginObject");
 
-    virtual void onCoreUpdateMessage(const Utils::Event& event) = 0;
+    void onCoreUpdateMessage(const Utils::Event& event);
 protected:
     void set_status(Status status);
 
     virtual void start_plugin() = 0;
     virtual void stop_plugin() = 0;
+
+    virtual void notify_frontend(const std::string& event, const std::string& msg) = 0;
 
 
 private:

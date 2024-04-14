@@ -10,10 +10,12 @@ class WebUi : public Core::Api::IUiPlugin {
 public:
     explicit WebUi(const std::string& host, std::uint16_t port);
 
-    virtual void onCoreUpdateMessage(const Utils::Event& event) override;
+    //virtual void onCoreUpdateMessage(const Utils::Event& event) override;
 protected:
     virtual void start_plugin() override;
     virtual void stop_plugin() override;
+
+    virtual void notify_frontend(const std::string& event, const std::string& msg);
 
 private:
     Http::Server m_server;
