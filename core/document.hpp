@@ -70,7 +70,12 @@ private:
     std::vector<DocumentChange> m_change_history;
     Utils::ThreadSafeQueue<DocumentChange> m_change_queue;
 public:
-    Document(const std::string& filename = "Document");
+    explicit Document(const std::string& filename = "Document");
+    Document(const Document& other) :
+        m_content(other.m_content),
+        m_encoding(other.m_encoding)
+    {}
+
     Document& operator=(Document&& other){
         if(this == &other) {
             return *this;
@@ -85,11 +90,7 @@ public:
         return *this;
     }
 
-    Document(const Document& other){
-        m_content = other.m_content;
-        m_encoding = other.m_encoding;
 
-    }
 
     void update_history();
     const std::string& content() const { return m_content; }

@@ -14,17 +14,13 @@ class DocumentHandler : public Api::IObject {
 private:
     std::map<std::string, Document> m_documents;
     Api::IFileIOFactory& m_fileio_factory;
-    
+
 public:
     explicit DocumentHandler(Api::IFileIOFactory& fileio_factory);
 
+    void update();
     void open_file(const std::string& filepath, std::shared_ptr<Api::IFileReader> filereader);
-    
     void close_file(const std::string& filepath);
-    
-    const std::map<std::string, Document>& get_open_documents();
-
-    Document& get_document(const std::string& filepath);
 
     void onOpenFileCommand(const Utils::Event& event);
     void onCloseFileCommand(const Utils::Event& event);

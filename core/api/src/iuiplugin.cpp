@@ -7,15 +7,11 @@ namespace Yate::Core::Api {
 
 const std::string DOMAIN = "YCAPI::IUIP";
 
-IUiPlugin::IUiPlugin(std::string name)
+IUiPlugin::IUiPlugin(const std::string& name)
     : IObject(name),
       m_running(false),
       m_status(Status::STOPPED)
 {}
-
-void IUiPlugin::set_status(Status status) {
-    m_status = status;
-}
 
 void IUiPlugin::start(){
     if(m_status != Status::STOPPED){
@@ -47,6 +43,10 @@ void IUiPlugin::onCoreUpdateMessage(const Utils::Event& event) {
         }
     }
     log(Log_t::DEBUG, DOMAIN, "Event %s emitted.\n", event.name.c_str());
+}
+
+void IUiPlugin::set_status(Status status) {
+    m_status = status;
 }
 
 } // end namespace Yate::Core::Api

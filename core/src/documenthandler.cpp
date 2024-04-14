@@ -9,8 +9,16 @@ constexpr const std::string DOMAIN = "YCORE::DOCH";
 
 DocumentHandler::DocumentHandler(Api::IFileIOFactory& fileio_factory)
     : Api::IObject("DocumentHandler"),
+      m_documents(),
       m_fileio_factory(fileio_factory)
 {}
+
+void DocumentHandler::update()
+{
+    for(auto d : m_documents){
+        d.second.update_history();
+    }
+}
 
 void DocumentHandler::open_file(const std::string& filepath, std::shared_ptr<Api::IFileReader> filereader){
     if(m_documents.find(filepath) == m_documents.end()){
@@ -26,14 +34,6 @@ void DocumentHandler::open_file(const std::string& filepath, std::shared_ptr<Api
 
 void DocumentHandler::close_file(const std::string& filepath){
     emit_event("open_file_list_change", m_documents);
-}
-
-Document& DocumentHandler::get_document(const std::string& filename){
-    return m_documents.at(filename);
-}
-
-const std::map<std::string, Document>& DocumentHandler::get_open_documents(){
-    return m_documents;
 }
 
 void DocumentHandler::onOpenFileCommand(const Utils::Event& event){

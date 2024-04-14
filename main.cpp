@@ -95,6 +95,7 @@ int main(int argc, char* argv[]){
     using namespace std::chrono_literals;
     while(true){
         // Main loop
+        document_handler.update();
         std::this_thread::sleep_for(1ms);
     }
 	return 0;

@@ -17,12 +17,13 @@ public:
         STOPPED
     };
 
+    IUiPlugin(const std::string& name = "PluginObject");
+
     void start();
     void stop();
 
     inline bool is_running() const { return m_status == Status::RUNNING; }
 
-    IUiPlugin(std::string name = "PluginObject");
 
     void onCoreUpdateMessage(const Utils::Event& event);
 protected:
