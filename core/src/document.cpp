@@ -6,21 +6,32 @@ using namespace Utils;
 
 constexpr const std::string DOMAIN = "YCORE::DOC";
 
-void DocumentChange::print(){
-    const char* op = (operation == Operation::INSERT) ? "INSERT" : "DELETE";
-    log(Log_t::DEBUG, DOMAIN, "DocumentChange: %s", op);
+DocumentChange::DocumentChange()
+    :
+    origin_id(0),
+    timestamp(0),
+    operation(Operation::NOP),
+    cursor_position(0),
+    length(0),
+    data()
+{
+
 }
 
-Document::Document(std::string filename)
-    : /*Utils::ObservableSubject<Document>(this),*/
-      Api::IObject(filename)
+void DocumentChange::print(){
+    const char* op = (operation == Operation::INSERT) ? "INSERT" : "DELETE";
+    log(Log_t::DEBUG, DOMAIN, "DocumentChange: %u %u %s %u %u %s", origin_id, timestamp, op, cursor_position, length, data.c_str());
+}
+
+Document::Document(const std::string& filename)
+    : Api::IObject(filename),
+      m_encoding(encoding_t::ASCII)
 {
 
 }
 
 void Document::enqueue_document_change(DocumentChange& document_change)
 {
-    //const std::lock_guard<std::mutex> lock(m_doc_mutex);
     m_change_queue.push(std::move(document_change));
 }
 

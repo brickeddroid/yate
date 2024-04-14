@@ -8,7 +8,7 @@
 /*
  * Source: https://codetrips.com/2020/07/26/modern-c-writing-a-thread-safe-queue/comment-page-1/
  *
- * Cite:
+ * Cite from the article above:
  * This is a more general approach to API design that holds, loosely:
  *      “Make interfaces easy to use right, and hard to use wrong”
  * (originally attributed to Martin Fowler)

@@ -5,8 +5,8 @@ using namespace Yate::Utils;
 
 namespace Yate::Core::Api {
 const std::string DOMAIN = "YCOREAPI";
-IObject::IObject(std::string name)
-    : m_name(name)
+IObject::IObject(const std::string& name)
+    : m_name(std::move(name))
 {
     log(Log_t::VERBOSE, DOMAIN, "%s::IObject created\n", m_name.c_str());
 }

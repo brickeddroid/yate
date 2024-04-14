@@ -1,5 +1,3 @@
-enable_testing()
-
 add_executable(
   core_test
   test.cpp

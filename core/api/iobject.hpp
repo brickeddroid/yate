@@ -13,10 +13,10 @@ private:
 protected:
     inline void set_name(const std::string& name) { m_name = name; }
 public:
-    IObject(std::string name = "IObject");
+    explicit IObject(const std::string& name = "IObject");
     virtual ~IObject();
 
-    inline const std::string& name() { return m_name; }
+    inline constexpr const std::string& name() const { return m_name; }
 };
 
 } // end namespace Yate::Core::Api

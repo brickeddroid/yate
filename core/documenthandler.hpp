@@ -16,7 +16,7 @@ private:
     Api::IFileIOFactory& m_fileio_factory;
     
 public:
-    DocumentHandler(Api::IFileIOFactory& fileio_factory);
+    explicit DocumentHandler(Api::IFileIOFactory& fileio_factory);
 
     void open_file(const std::string& filepath, std::shared_ptr<Api::IFileReader> filereader);
     
