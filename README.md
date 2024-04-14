@@ -18,6 +18,15 @@
 ```./yate``` (or with Windows ```.\yate```)<br>
 With a webbrowser visit ```localhost:8082```
 
+### Run unittests
+#### Linux
+  ```
+  cd build
+  cmake -DYATE_PROJECT_BUILD_TESTING=true ..
+  make
+  make test
+  ```
+
 ### Dependencies
 #### Internal
 Small asynchronous http server created for this project:<br>
