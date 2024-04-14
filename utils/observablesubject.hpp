@@ -38,6 +38,19 @@ public:
         m_observers[eventName].emplace_back(std::bind(memberFunction, object, std::placeholders::_1));
     }
 
+    template<typename ObjectType>
+    void unregister_observer(const std::string& eventName, void (ObjectType::*memberFunction)(const Event&), ObjectType* object) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        auto& observers = m_observers[eventName];
+        for (auto it = observers.begin(); it != observers.end(); ++it) {
+            if (it->target<void(ObjectType::*)(const Event&)>() == std::bind(memberFunction, object, std::placeholders::_1)) {
+                observers.erase(it);
+                break;
+            }
+        }
+    }
+
+
     template<typename... Args>
     void emit_event(const std::string& eventName, Args&&... args) {
         Event event(eventName, std::forward<Args>(args)...);
