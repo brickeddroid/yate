@@ -26,9 +26,27 @@ add_subdirectory(core)
 add_subdirectory(plugins)
 add_subdirectory(wrapper)
 
-if(YATE_PROJECT_BUILD_TESTING)
-  enable_testing()
-  add_subdirectory(unittests)
+if(YATE_UNIT_TEST)
+    enable_testing()
+    add_subdirectory(unittests)
+endif()
+
+if(YATE_STATIC_ANALYSIS)
+    find_program(CMAKE_CXX_CPPCHECK NAMES cppcheck)
+    if (CMAKE_CXX_CPPCHECK)
+        list(
+            APPEND CMAKE_CXX_CPPCHECK
+                "--enable=all"
+                "--inconclusive"
+                "--force"
+                "--inline-suppr"
+                "--suppress=missingIncludeSystem"
+                "--suppress=*:*${CMAKE_BINARY_DIR}/*"
+                "--xml"
+                "--output-file=static_analysis.xml"
+        )
+    endif()
+    set(CMAKE_CXX_CPPCHECK_BACKUP "{CMAKE_CXX_CPPCHECK}")
 endif()
 
 add_executable(${EXECUTABLE_NAME} ${SRC_MAIN})
