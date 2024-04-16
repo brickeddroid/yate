@@ -13,6 +13,7 @@ protected:
     virtual std::string doc_change_to_string(const Core::DocumentChange& doc_change) override;
 public:
     JsonWrapper();
+    virtual ~JsonWrapper() = default;
     /*
     virtual void onOpenFileListChange(const Utils::Event & event) override;
     virtual void onFileOpened(const Utils::Event & event) override;

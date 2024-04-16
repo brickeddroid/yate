@@ -18,6 +18,7 @@ public:
     };
 
     IUiPlugin(const std::string& name = "PluginObject");
+    virtual ~IUiPlugin() = default;
 
     void start();
     void stop();
@@ -38,7 +39,6 @@ protected:
 private:
     std::thread m_thread;
 
-    bool m_running;
     Status m_status;
 
     std::string m_name;

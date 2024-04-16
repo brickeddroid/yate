@@ -23,7 +23,7 @@ private:
     std::queue<T> m_queue;
     mutable std::mutex m_lock;
 
-    bool empty(){
+    bool empty() const{
         std::lock_guard<std::mutex> lock(m_lock);
         return m_queue.empty();
     }
@@ -40,7 +40,7 @@ public:
 
     virtual ~ThreadSafeQueue() { }
 
-    unsigned long size(){
+    unsigned long size() const {
         std::lock_guard<std::mutex> lock(m_lock);
         return m_queue.size();
     }

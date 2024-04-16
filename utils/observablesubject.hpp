@@ -26,11 +26,19 @@ public:
         arguments.reserve(sizeof...(Args));
         (arguments.emplace_back(std::any(args)), ...);
     }
+
+    bool operator==(const Event& other) const {
+        return name == other.name &&
+               arguments.size() == other.arguments.size();
+    }
 };
 
 class ObservableSubject {
 public:
     using ObserverFunction = std::function<void(const Event&)>;
+    ObservableSubject() = default;
+    virtual ~ObservableSubject() = default;
+
 
     template<typename ObjectType>
     void register_observer(const std::string& eventName, void (ObjectType::*memberFunction)(const Event&), ObjectType* object) {

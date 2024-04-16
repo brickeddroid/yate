@@ -9,7 +9,6 @@ const std::string DOMAIN = "YCAPI::IUIP";
 
 IUiPlugin::IUiPlugin(const std::string& name)
     : IObject(name),
-      m_running(false),
       m_status(Status::STOPPED)
 {}
 

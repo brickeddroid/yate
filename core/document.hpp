@@ -33,7 +33,7 @@ struct DocumentChange {
 
     DocumentChange();
 
-    bool operator==(const DocumentChange& other){
+    bool operator==(const DocumentChange& other) const {
         return(
             origin_id == other.origin_id
             && timestamp == other.timestamp
@@ -46,23 +46,12 @@ struct DocumentChange {
 
 
     void print();
-    /*
-    DocumentChange(const DocumentChange& other){
-        origin = other.origin;
-        timestamp = other.timestamp;
-        operation = other.operation;
-        cursor_position = other.cursor_position;
-        length = other.length;
-        data = other.data;
-
-    }
-    */
 };
 
 
 class Document : public Api::IObject {
 private:
-    std::mutex m_doc_mutex;
+    mutable std::mutex m_doc_mutex;
 
     std::string m_content;
     encoding_t m_encoding;
@@ -86,6 +75,7 @@ public:
 
         m_content = other.m_content;
         m_encoding = other.m_encoding;
+        m_change_history = other.m_change_history;
 
         return *this;
     }
@@ -106,7 +96,7 @@ public:
 
 template <> struct std::hash<Yate::Core::DocumentChange>
 {
-    size_t operator()(const Yate::Core::DocumentChange& d){
+    size_t operator()(const Yate::Core::DocumentChange& d) const {
         return (
             (std::hash<unsigned long>{}(d.origin_id))
             ^ ((std::hash<unsigned long>{}(d.timestamp)) << 1) >> 1
