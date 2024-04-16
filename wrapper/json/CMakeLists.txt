@@ -1,6 +1,6 @@
 cmake_policy(SET CMP0135 NEW)
 include(FetchContent)
-
+unset(CMAKE_CXX_CPPCHECK)
 FetchContent_Declare(json
     URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
     PREFIX ${EXTERNAL_INSTALLATION_DIR}
@@ -22,4 +22,5 @@ target_include_directories(wrapper
         ${EXTERNAL_INSTALLATION_DIR}/json/single_include/nlohmann
 )
 
+set(CMAKE_CXX_CPPCHECK "${CMAKE_CXX_CPPCHECK_BACKUP}")
 

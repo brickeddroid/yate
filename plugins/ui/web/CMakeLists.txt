@@ -1,6 +1,7 @@
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+unset(CMAKE_CXX_CPPCHECK)
 include(FetchContent)
 FetchContent_Declare(
   httpserver
@@ -11,6 +12,7 @@ FetchContent_Declare(
   GIT_TAG main
 )
 FetchContent_MakeAvailable(httpserver)
+
 
 target_sources(plugins
     PRIVATE
@@ -33,3 +35,5 @@ target_link_directories(plugins
 )
 
 file(COPY ./frontend DESTINATION ${CMAKE_BINARY_DIR})
+
+set(CMAKE_CXX_CPPCHECK "${CMAKE_CXX_CPPCHECK_BACKUP}")
