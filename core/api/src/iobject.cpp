@@ -10,8 +10,9 @@ IObject::IObject(const std::string& name)
 {
     log(Log_t::VERBOSE, DOMAIN, "IObject::%s created\n", m_name.c_str());
 }
+/*
 IObject::~IObject(){
     log(Log_t::VERBOSE, DOMAIN, "IObject::%s destroyed\n", m_name.c_str());
 }
-
+*/
 } // end namespace Yate::Core::Api

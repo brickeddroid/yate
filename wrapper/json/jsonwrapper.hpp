@@ -14,19 +14,6 @@ protected:
 public:
     JsonWrapper();
     virtual ~JsonWrapper() = default;
-    /*
-    virtual void onOpenFileListChange(const Utils::Event & event) override;
-    virtual void onFileOpened(const Utils::Event & event) override;
-    virtual void onDocumentChange(const Utils::Event&) override;
-
-    virtual void onCommandRequest(const Utils::Event& event) override;
-/*
-    virtual std::string wrap_document_content(const std::string& content) override;
-    virtual std::string wrap_document_history(const std::vector<Core::DocumentChange>& history) override;
-    virtual std::string wrap_open_document_list(const std::map<std::string, Core::Document>& document_list) override;
-*/
-    //virtual std::string process_incoming_message(const std::string& msg) override;
-
 };
 
 } // end namespace Yate::Wrapper

@@ -43,6 +43,7 @@ void Document::update_history(){
         m_change_history.emplace_back(*change);
         change = m_change_queue.pop();
         ++count;
+        log(Log_t::VERBOSE, DOMAIN, "Update history content of %s and notify observers.\n", name().c_str());
         // TODO
     }
 

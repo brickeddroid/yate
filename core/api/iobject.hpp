@@ -13,8 +13,9 @@ private:
 protected:
     inline void set_name(const std::string& name) { m_name = name; }
 public:
-    explicit IObject(const std::string& name = "IObject");
-    virtual ~IObject();
+    explicit IObject(const std::string& name);
+    IObject() = default;
+    virtual ~IObject() = default;
 
     inline constexpr const std::string& name() const { return m_name; }
 };

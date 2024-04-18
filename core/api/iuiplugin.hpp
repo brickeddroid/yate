@@ -20,8 +20,8 @@ public:
     IUiPlugin(const std::string& name = "PluginObject");
     virtual ~IUiPlugin() = default;
 
-    void start();
-    void stop();
+    void start_ui_thread();
+    void stop_ui_thread();
 
     inline bool is_running() const { return m_status == Status::RUNNING; }
 
@@ -30,8 +30,8 @@ public:
 protected:
     void set_status(Status status);
 
-    virtual void start_plugin() = 0;
-    virtual void stop_plugin() = 0;
+    virtual void start() = 0;
+    virtual void stop() = 0;
 
     virtual void notify_frontend(const std::string& event, const std::string& msg) = 0;
 

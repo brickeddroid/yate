@@ -12,19 +12,19 @@ IUiPlugin::IUiPlugin(const std::string& name)
       m_status(Status::STOPPED)
 {}
 
-void IUiPlugin::start(){
+void IUiPlugin::start_ui_thread(){
     if(m_status != Status::STOPPED){
         return;
     }
     log(Log_t::INFO, DOMAIN, "Starting %s\n", name().c_str());
     set_status(Status::STARTING);
-    m_thread = std::thread(&IUiPlugin::start_plugin, this);
+    m_thread = std::thread(&IUiPlugin::start, this);
     set_status(Status::RUNNING);
     log(Log_t::INFO, DOMAIN, "%s started\n", name().c_str());
 }
 
-void IUiPlugin::stop(){
-    stop_plugin();
+void IUiPlugin::stop_ui_thread(){
+    stop();
     m_thread.join();
     set_status(Status::STOPPED);
 }

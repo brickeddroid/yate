@@ -1,5 +1,7 @@
 #include "../iwrapper.hpp"
 
+#include "../../../utils/log.hpp"
+
 namespace Yate::Core::Api {
 
 using namespace Utils;

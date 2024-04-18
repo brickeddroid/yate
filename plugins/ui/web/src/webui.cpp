@@ -29,13 +29,13 @@ WebUi::WebUi(const std::string& host, std::uint16_t port)
 
 }
 
-void WebUi::start_plugin()
+void WebUi::start()
 {
     register_uris();
     m_server.start();
 }
 
-void WebUi::stop_plugin()
+void WebUi::stop()
 {
     m_server.stop();
 }
