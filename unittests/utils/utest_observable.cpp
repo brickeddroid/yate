@@ -18,12 +18,17 @@ public:
 
 TEST(UtilsTest, AsyncObserverCallbackAssertion){
     Yate::Utils::ObservableSubject s;
-    MockOfTheMockObserver observer;
+    std::shared_ptr<MockOfTheMockObserver> observer = std::make_shared<MockOfTheMockObserver>();
 
-    s.register_observer("unit_test_callback", &MockOfTheMockObserver::callback, &observer);
+    s.register_observer("unit_test_callback", &MockOfTheMockObserver::callback, observer);
 
-    EXPECT_CALL(observer, callback(Yate::Utils::Event("unit_test_callback")))
+    EXPECT_CALL(*observer, callback(Yate::Utils::Event("unit_test_callback")))
             .WillOnce(testing::Return());
 
     s.emit_event("unit_test_callback");
+
+    s.unregister_observer("unit_test_callback", &MockOfTheMockObserver::callback, observer);
+
+    s.emit_event("unit_test_callback");
+
 }
