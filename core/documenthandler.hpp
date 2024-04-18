@@ -19,7 +19,7 @@ public:
     explicit DocumentHandler(Api::IFileIOFactory& fileio_factory);
 
     void update();
-    void open_file(const std::string& filepath, std::shared_ptr<Api::IFileReader> filereader);
+    void open_file(const std::string& filepath, const std::string& fileio);
     void close_file(const std::string& filepath);
 
     void onOpenFileCommand(const Utils::Event& event);

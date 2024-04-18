@@ -5,17 +5,17 @@
 #include <string>
 
 namespace Yate::Core::Api {
-class IFileReader {
+class FileReader {
 public:
-    IFileReader() = default;
-    virtual ~IFileReader() = default;
+    FileReader() = default;
+    virtual ~FileReader() = default;
     virtual Document read(const std::string& filepath);
 };
 
-class IFileWriter {
+class FileWriter {
 public:
-    IFileWriter() = default;
-    virtual ~IFileWriter() = default;
+    FileWriter() = default;
+    virtual ~FileWriter() = default;
     virtual void write(const std::string& filepath, const Document& document);
 };
 

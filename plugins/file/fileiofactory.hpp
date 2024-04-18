@@ -7,11 +7,11 @@ namespace Yate::Plugin {
 
 class FileIOFactory : public Core::Api::IFileIOFactory {
     public:
-        FileIOFactory();
+        FileIOFactory() = default;
         //virtual ~FileIOFactory() = default;
 
-        //virtual Core::Api::IFileReader get_reader(const std::string& name) override;
-        //virtual Core::Api::IFileWriter get_writer(const std::string& name) override;
+        virtual std::unique_ptr<Core::Api::FileReader> create_reader(const std::string& type) const override;
+        virtual std::unique_ptr<Core::Api::FileWriter> create_writer(const std::string& type) const override;
 };
 
 } // end namespace Yate::Plugin

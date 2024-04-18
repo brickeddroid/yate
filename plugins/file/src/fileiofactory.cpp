@@ -8,10 +8,18 @@ namespace Yate::Plugin {
 using namespace Utils;
 
 constexpr const char* DOMAIN = "YPLUGIN::FILE";
+std::unique_ptr<Core::Api::FileReader> FileIOFactory::create_reader(const std::string& name) const {
+    if("local" == name){
+        return std::make_unique<LocalFileReader>();
+    }
+    return std::make_unique<Core::Api::FileReader>();
+}
 
-FileIOFactory::FileIOFactory() : Core::Api::IFileIOFactory()
-{
-    add_reader("local", std::make_shared<LocalFileReader>());
+std::unique_ptr<Core::Api::FileWriter> FileIOFactory::create_writer(const std::string& name) const {
+    if("local" == name){
+        return std::make_unique<LocalFileWriter>();
+    }
+    return std::make_unique<Core::Api::FileWriter>();
 }
 
 } //end namespace Yate::Plugin
