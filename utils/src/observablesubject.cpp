@@ -4,8 +4,10 @@
 
 namespace Yate::Utils {
 
+constexpr const std::string DOMAIN = "YUTIL::OBSUB";
+
 void ObservableSubject::clear_notifications() {
-    log(Log_t::DEBUG, "SUBJECT", "Clear notifications\n");
+    log(Log_t::DEBUG, DOMAIN, "Clear notifications\n");
     std::vector<std::future<void>>::iterator it = m_notifications_in_execution.begin();
     int count = 0;
     while (it != m_notifications_in_execution.end()) {
@@ -15,29 +17,29 @@ void ObservableSubject::clear_notifications() {
             ++count;
         }
         else {
-            log(Log_t::DEBUG, "SUBJECT", "Executor not ready yet\n");
+            log(Log_t::DEBUG, DOMAIN, "Executor not ready yet\n");
             ++it;
         }
     }
-    log(Log_t::DEBUG, "SUBJECT", "Cleared %d notifications\n", count);
+    log(Log_t::DEBUG, DOMAIN, "Cleared %d notifications\n", count);
 }
 
 void ObservableSubject::notify_observers(const std::string& eventName, const Event& event) {
     std::lock_guard<std::mutex> lock(m_mutex);
     int count = 0;
-    log(Log_t::DEBUG, "SUBJECT", "Notify observers of event '%s' \n", eventName.c_str());
+    log(Log_t::DEBUG, DOMAIN, "Notify observers of event '%s' \n", eventName.c_str());
     try {
-    auto it = m_observers.find(eventName);
-    if (it != m_observers.end()) {
-        for (auto& observer : it->second) {
-            m_notifications_in_execution.emplace_back(std::async(std::launch::async, observer, event));
-            ++count;
+        auto it = m_observers.find(eventName);
+        if (it != m_observers.end()) {
+            for (auto& observer : it->second) {
+                m_notifications_in_execution.emplace_back(std::async(std::launch::async, observer.first, event));
+                ++count;
+            }
         }
-    }
     } catch(std::exception& e) {
         log(Log_t::ERROR, "%s\n", e.what());
     }
-    log(Log_t::DEBUG, "SUBJECT", "%d observers of event '%s' notified.\n", count, eventName.c_str());
+    log(Log_t::DEBUG, DOMAIN, "%d observers of event '%s' notified.\n", count, eventName.c_str());
     clear_notifications();
 }
 

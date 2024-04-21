@@ -7,7 +7,7 @@
 
 namespace Yate::Core::Api {
 
-class IObject : public Utils::ObservableSubject {
+class IObject : public Utils::ObservableSubject, public Utils::Observer {
 private:
     std::string m_name;
 protected:
