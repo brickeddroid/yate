@@ -1,22 +1,14 @@
-/*
-#include <string>
-#include <iostream>
-#include <fstream>
-*/
-#include <thread>
 #include <chrono>
-
 #include <exception>
+
 #include "utils/log.hpp"
 #include "core/documenthandler.hpp"
-//#include "plugins/document/documentfactory.hpp"
 #include "plugins/file/fileiofactory.hpp"
 #include "plugins/ui/web/webui.hpp"
 #include "wrapper/json/jsonwrapper.hpp"
-/*
-#include <sys/poll.h>
-#include <termios.h>
-*/
+
+using namespace std::chrono_literals;
+
 using namespace Yate;
 using namespace Utils;
 
@@ -29,73 +21,52 @@ using FileIOFactory = Plugin::FileIOFactory;
 
 
 const std::string DOMAIN = "YMAIN";
-/*
-void set_term_quiet_input(){
-    struct termios tc;
-    tcgetattr(0, &tc);
-    tc.c_lflag &= ~(ICANON | ECHO);
-    tc.c_cc[VMIN] = 0;
-    tc.c_cc[VTIME] = 0;
-    tcsetattr(0, TCSANOW, &tc);
-}
-*/
+
 int main(int argc, char* argv[]){
     Utils::LogLevel = Log_t::SILLY;
 
     log(Log_t::INFO, DOMAIN, "Welcome to YATE\n");
 
     FileIOFactory factory;
-    DocumentHandler document_handler(factory);
-    JsonWrapper json_wrapper;
-    WebUi webui_plugin("0.0.0.0", 8082);
+    std::shared_ptr<DocumentHandler> document_handler = std::make_shared<DocumentHandler>(factory);
+    std::shared_ptr<IWrapper> json_wrapper = std::make_shared<JsonWrapper>();
 
-    IWrapper* wrapper = &json_wrapper;
-    IUiPlugin* uiplugin = &webui_plugin;
+    std::vector<std::shared_ptr<IUiPlugin>> ui_plugins {
+        std::make_shared<WebUi>("0.0.0.0", 8082),
+        std::make_shared<WebUi>("0.0.0.0", 8083)
+    };
+
+
     // Connection between components through observer registration
 
     // DocumentHandler => IWrapper
-    document_handler.register_observer("file_opened", &IWrapper::onFileOpened, wrapper);
-    document_handler.register_observer("open_file_list_change", &IWrapper::onOpenFileListChange, wrapper);
+    document_handler->register_observer("file_opened", &IWrapper::onFileOpened, json_wrapper);
+    document_handler->register_observer("open_file_list_change", &IWrapper::onOpenFileListChange, json_wrapper);
 
     // IWrapper => DocumentHandler
-    json_wrapper.register_observer("cmd_open_file", &DocumentHandler::onOpenFileCommand, &document_handler);
-    json_wrapper.register_observer("cmd_close_file", &DocumentHandler::onCloseFileCommand, &document_handler);
-    json_wrapper.register_observer("cmd_document_change", &DocumentHandler::onDocumentChangeCommand, &document_handler);
+    json_wrapper->register_observer("file_cmd_req", &DocumentHandler::onFileCommand, document_handler);
+    //json_wrapper->register_observer("cmd_close_file", &DocumentHandler::onCloseFileCommand, document_handler);
+    json_wrapper->register_observer("cmd_document_change", &DocumentHandler::onDocumentChangeCommand, document_handler);
 
 
-    // IUiPlugin => IWrapper
-    webui_plugin.register_observer("cmd_request", &IWrapper::onCommandRequest, wrapper);
+    for(auto& ui_plugin: ui_plugins){
+        // IUiPlugin => IWrapper
+        ui_plugin->register_observer("file_cmd_request", &IWrapper::onFileCommandRequest, json_wrapper);
 
-    // IWrapper => IUiPlugin
-    json_wrapper.register_observer("file_opened", &IUiPlugin::onCoreUpdateMessage, uiplugin);
-    json_wrapper.register_observer("open_file_list_change", &IUiPlugin::onCoreUpdateMessage, uiplugin);
+        // IWrapper => IUiPlugin
+        json_wrapper->register_observer("file_opened", &IUiPlugin::onCoreUpdateMessage, ui_plugin);
+        json_wrapper->register_observer("open_file_list_change", &IUiPlugin::onCoreUpdateMessage, ui_plugin);
 
-
-    try {
-        webui_plugin.start();
-    } catch(std::runtime_error& e) {
-        log(Log_t::ERROR, "%s\n", e.what());
-        throw;
-    }
-/*
-    if(argv[1]){
-        log(Log_t::DEBUG, DOMAIN, "Open file\n");
-        std::string filename = argv[1];
-        document_handle.open(filename);
-        Yate::Core::IDocument* document = document_handle.get_current_document();
-        if(document){
-            for(auto s : document->get_lines()){
-                log(Log_t::SILLY, DOMAIN, "%s\n", s.c_str());
-            }
+        try {
+            ui_plugin->start_ui_thread();
+        } catch(std::runtime_error& e) {
+            log(Log_t::ERROR, "%s\n", e.what());
         }
-        log(Log_t::DEBUG, DOMAIN, "File opened\n");
     }
-*/
-    //set_term_quiet_input();
-    using namespace std::chrono_literals;
+
+    // Main loop
     while(true){
-        // Main loop
-        document_handler.update();
+        document_handler->update();
         std::this_thread::sleep_for(1ms);
     }
 	return 0;
