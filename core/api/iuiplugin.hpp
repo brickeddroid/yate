@@ -38,10 +38,7 @@ protected:
 
 private:
     std::thread m_thread;
-
     Status m_status;
-
-    std::string m_name;
 };
 
 } // end namespace Yate::Core::Api

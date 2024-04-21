@@ -74,37 +74,39 @@ void IWrapper::onOpenFileListChange(const Utils::Event & event){
 }
 
 void IWrapper::onDocumentChange(const Utils::Event& event){
+    if(event.arguments.size() != 1){
+        log(Log_t::ERROR, DOMAIN, "%s Callback error\n", event.name.c_str());
+        return;
+    }
     log(Log_t::DEBUG, DOMAIN, "onDocumentChange Callback received\n");
-    auto& arguments = event.arguments;
-    if (arguments.size() > 0) {
-        try {
-            auto doc_change = std::any_cast<const DocumentChange&>(arguments[0]);
-            std::string result = doc_change_to_string(doc_change);
-            log(Log_t::VERBOSE, DOMAIN, "Document change converted\n");
-            emit_event("document_change", result);
-        } catch(const std::bad_any_cast& e) {
-            log(Log_t::ERROR, DOMAIN, "Error: %s\n", e.what());
-        }
+    try {
+        auto doc_change = std::any_cast<const DocumentChange&>(event.arguments[0]);
+        std::string result = doc_change_to_string(doc_change);
+        log(Log_t::VERBOSE, DOMAIN, "Document change converted\n");
+        emit_event("document_change", result);
+    } catch(const std::bad_any_cast& e) {
+        log(Log_t::ERROR, DOMAIN, "Error: %s\n", e.what());
     }
 }
 
-void IWrapper::onCommandRequest(const Utils::Event& event){
-    log(Log_t::DEBUG, DOMAIN, "onCommandRequest Callback received\n");
-    auto& arguments = event.arguments;
-    if (arguments.size() > 0) {
-        try {
-            std::string msg = std::any_cast<const std::string&>(arguments[0]);
-            Core::Api::CommandEventMessage evt_msg = cmd_from_string(msg);
-            log(Log_t::VERBOSE, DOMAIN,
-                "Command converted %s %s %s\n",
-                evt_msg.cmd.c_str(),
-                evt_msg.filename.c_str(),
-                evt_msg.filerw.c_str()
-            );
-            emit_event(evt_msg.cmd, evt_msg.filename, evt_msg.filerw);
-        } catch(const std::bad_any_cast& e) {
-            log(Log_t::ERROR, DOMAIN, "Error: %s\n", e.what());
-        }
+void IWrapper::onFileCommandRequest(const Utils::Event& event){
+    if(event.arguments.size() != 1){
+        log(Log_t::ERROR, DOMAIN, "%s Callback error\n", event.name.c_str());
+        return;
+    }
+    log(Log_t::DEBUG, DOMAIN, "%s Callback received\n", event.name.c_str());
+    try {
+        std::string msg = std::any_cast<const std::string&>(event.arguments[0]);
+        Core::Api::CommandEventMessage evt_msg = cmd_from_string(msg);
+        log(Log_t::VERBOSE, DOMAIN,
+            "Command converted %s %s %s\n",
+            evt_msg.cmd.c_str(),
+            evt_msg.filename.c_str(),
+            evt_msg.filerw.c_str()
+        );
+        emit_event("file_cmd_req", evt_msg.op, evt_msg.filename, evt_msg.filerw);
+    } catch(const std::bad_any_cast& e) {
+        log(Log_t::ERROR, DOMAIN, "Error: %s\n", e.what());
     }
 }
 

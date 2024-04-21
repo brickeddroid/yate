@@ -40,7 +40,8 @@ std::string JsonWrapper::to_string(const Core::Api::EventMessage& event_message)
 Core::Api::CommandEventMessage JsonWrapper::cmd_from_string(const std::string& msg){
     Core::Api::CommandEventMessage evt_msg;
     json j = json::parse(msg);
-    evt_msg.cmd = j["cmd"].get<std::string>();
+    //evt_msg.cmd = j["cmd"].get<std::string>();
+    evt_msg.op  = j["op"].get<Core::DocumentHandler::Operation>();
     evt_msg.filename = j["file"].get<std::string>();
     evt_msg.filerw = j["filerw"].get<std::string>();
     log(Log_t::DEBUG, DOMAIN, "Command: '%s %s %s'\n", evt_msg.cmd.c_str(), evt_msg.filename.c_str(), evt_msg.filerw.c_str());

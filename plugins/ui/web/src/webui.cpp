@@ -60,7 +60,7 @@ void WebUi::register_uris()
         }
 
         const std::string file_ext = path.substr(path.find('.', 2)+1);
-        log(Log_t::DEBUG, DOMAIN, "File extension: %s\n", file_ext.c_str());
+        log(Log_t::VERBOSE, DOMAIN, "File extension: %s\n", file_ext.c_str());
         std::string mime_type = file_extension_to_mime_type(file_ext);//accept_content.substr(0, accept_content.find(","));
 
         if (std::ifstream ifs { path }) {
@@ -79,7 +79,7 @@ void WebUi::register_uris()
     auto on_receive_file_cmd_request = [this](const HttpRequest& http_request, HttpResponse& http_response) {
         log(Log_t::DEBUG, DOMAIN, "Command request received\n");
 
-        emit_event("cmd_request", http_request.content());
+        emit_event("file_cmd_request", http_request.content());
 
         http_response.set_status_code(HttpStatusCode::Ok);
         http_response.set_version(HttpVersion::Http_11);

@@ -2,11 +2,12 @@
 #define IWRAPPER_HPP
 
 #include "iobject.hpp"
-#include "../document.hpp"
+#include "../documenthandler.hpp"
 
 namespace Yate::Core::Api {
 struct CommandEventMessage {
     std::string cmd;
+    DocumentHandler::Operation op;
     std::string filename;
     std::string filerw;
 };
@@ -31,7 +32,7 @@ public:
     void onDocumentChange(const Utils::Event&);
 
     // Event callbacks for UiPlugin events
-    void onCommandRequest(const Utils::Event& event);
+    void onFileCommandRequest(const Utils::Event& event);
 };
 
 } // end namespace Yate::Core::Api
