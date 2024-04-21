@@ -1,6 +1,19 @@
 let characterTimerId = -1;
 let changeString = "";
 let cursorPosition = -1;
+
+const DocumentHandleOperation = {
+    Nop: 0
+    Open: 1,
+    Close: 2,
+    Save: 3,
+}
+const DocumentOperation = {
+    Nop: 0,
+    Insert: 1,
+    Delete: 2
+}
+
 function sendInsertion(cursorPos, char){
     if(characterTimerId != -1){
         clearTimeout(characterTimerId);
@@ -80,10 +93,10 @@ function load_file(event){
         console.log(e.target.result);
     };
     const objectUrl = window.URL.createObjectURL(input.files[0]);
-    open_file(objectUrl);
+    send_file_cmd_req(0, objectUrl, "local");
 }
 
-function open_file(cmd, filename, filereadwrite)
+function send_file_cmd_req(op, filename, filereadwrite)
 {
     hasOpened = true;
     (async () => {
@@ -93,7 +106,7 @@ function open_file(cmd, filename, filereadwrite)
                 'Accept': mimeTypeFromFileExt(filename),
                 'Content-Type': mimeTypeFromFileExt(filename)
             },
-            body: JSON.stringify({cmd: cmd, file: filename, filerw: filereadwrite })
+            body: JSON.stringify({op: op, file: filename, filerw: filereadwrite })
         });
         const content = await rawResponse.text();
     })();
@@ -135,7 +148,7 @@ function update_line_numbers(textarea){
 }
 
 function init_filehandle(){
-   open_file('cmd_open_file', './frontend/index.html', 'local');
+   send_file_cmd_req(DocumentHandleOperation.Open, './frontend/index.html', 'local');
    let dir_tree = document.querySelector("#dir_tree");
    if(dir_tree.children.length > 0){
        dir_tree.children[0].firstElementChild.classList.add("active");
@@ -266,23 +279,28 @@ function init(){
         update_line_numbers(this);
     });
 
-    const file_open = document.querySelector("#file_open");
-    file_open.addEventListener("click", function(e){
+    const menu_file_open = document.querySelector("#menu_file_open");
+    menu_file_open.addEventListener("click", function(e){
         show_overlay("open");
     });
 
-    const file_save = document.querySelector("#file_save");
-    file_save.addEventListener("click", function(e){
+    const btn_file_open = document.querySelector("#btn_file_open");
+    btn_file_open.addEventListener("click", function(e){
+        send_file_cmd_req(0, this.previousElementSibling.value, 'local'); close_overlay();
+    });
+
+    const menu_file_save = document.querySelector("#menu_file_save");
+    menu_file_save.addEventListener("click", function(e){
         show_overlay("save");
     });
 
-    const about_yate = document.querySelector("#about_yate");
-    about_yate.addEventListener("click", function(e){
+    const menu_about_yate = document.querySelector("#menu_about_yate");
+    menu_about_yate.addEventListener("click", function(e){
         show_overlay("credits");
     });
 
-    const ov_close = document.querySelector("#ov_close");
-    ov_close.addEventListener("click", function(e){
+    const btn_ov_close = document.querySelector("#ov_close");
+    btn_ov_close.addEventListener("click", function(e){
         close_overlay();
     });
 

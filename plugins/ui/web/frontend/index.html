@@ -13,8 +13,8 @@
                 <a href="javascript:void(0)" class="dropbtn">File</a>
                 <div class="dropdown-content">
                 <a href="#">Settings</a>
-                <a href="#" id="file_open">Open...</a>
-                <a href="#" id="file_save">Save...</a>
+                <a href="#" id="menu_file_open">Open...</a>
+                <a href="#" id="menu_file_save">Save...</a>
                 </div>
             </li>
             <li class="dropdown">
@@ -28,7 +28,7 @@
             <li class="dropdown">
                 <a href="javascript:void(0)" class="dropbtn">About</a>
                 <div class="dropdown-content">
-                <a href="#" id="about_yate">Yate</a>
+                <a href="#" id="menu_about_yate">Yate</a>
                 <a href="https://github.com/brickeddroid/yate" target="_blank">Yate source code</a>
                 </div>
             </li>
@@ -52,7 +52,7 @@
             <button id="ov_close" class="ov_close">&#128940;</button>
             <div id="ov_open" class="ovl_impl">
                 <input type="text"/>
-                <button onclick="open_file('cmd_open_file', this.previousElementSibling.value, 'local'); close_overlay();">Open</button>
+                <button id="btn_file_open">Open</button>
             </div>
             <div id="ov_save" class="ovl_impl">
                 <input type="text"/>
