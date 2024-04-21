@@ -27,6 +27,7 @@ add_subdirectory(plugins)
 add_subdirectory(wrapper)
 
 if(YATE_UNIT_TEST)
+    include(CTest)
     enable_testing()
     add_subdirectory(unittests)
 endif()
