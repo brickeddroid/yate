@@ -15,8 +15,8 @@
 (Windows was not tested so far)
 
 ### Run it
-```./yate``` (or with Windows ```.\yate```)<br>
-With a webbrowser visit ```localhost:8082```
+```./yate``` (or ```.\yate``` under Windows if build succeed)<br>
+With a webbrowser visit ```localhost:8082``` or ```localhost:8083```. (The user interface is started two times in the example implementation)
 
 ### Run unittests
 #### Linux
