@@ -45,7 +45,6 @@ int main(int argc, char* argv[]){
 
     // IWrapper => DocumentHandler
     json_wrapper->register_observer("file_cmd_req", &DocumentHandler::onFileCommand, document_handler);
-    //json_wrapper->register_observer("cmd_close_file", &DocumentHandler::onCloseFileCommand, document_handler);
     json_wrapper->register_observer("cmd_document_change", &DocumentHandler::onDocumentChangeCommand, document_handler);
 
 
